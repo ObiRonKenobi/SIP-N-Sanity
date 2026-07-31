@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SIP-N-Sanity
 
-## Getting Started
+**Please Hold** — a sarcastic 16-bit VoIP support survival game.
 
-First, run the development server:
+Survive 9:00 AM–5:00 PM balancing **Sanity**, **CSAT**, and the **Queue**. Face the Bathroom Gamble, Lunch Stealth, a typing Outage, and one optional Smoke Break.
+
+## Quick start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Pace:** ~1 in-game minute per real second (full shift ≈ 8 minutes), plus mini-games.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Stack
 
-## Learn More
+Next.js 14 · Zustand · Tailwind · react-konva · framer-motion
 
-To learn more about Next.js, take a look at the following resources:
+## Docs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [`contextAnchor.md`](./contextAnchor.md) — canonical design / roadmap
+- [`docs/gemini-sprite-prompts.md`](./docs/gemini-sprite-prompts.md) — sprite generation prompts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Hosting
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Local playable build lives here. Docker + [rbyt3r.com](https://rbyt3r.com) deployment is handled in a separate workspace.

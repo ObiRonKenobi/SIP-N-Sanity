@@ -1,0 +1,16 @@
+{
+  "smokeBreakOutcomes": [
+    {
+      "id": "win",
+      "text": "Cool smoke fills your lungs. You forget your troubles. Fresh air and a cancer stick. Life is good.",
+      "sanityEffect": 30,
+      "probability": 0.33
+    },
+    {
+      "id": "lose",
+      "text": "The Witch catches you. 'YOU FUME-LOVING LEECH! GET BACK HERE!'",
+      "sanityEffect": -40,
+      "probability": 0.67
+    }
+  ]
+}

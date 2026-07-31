@@ -1,0 +1,82 @@
+[
+  {
+    "ticketID": "TS-420",
+    "callerName": "Boomer McOld",
+    "problem": "I plugged my headset in but it won't wake up.",
+    "answers": [
+      { "text": "Have you tried turning it off and on again?", "effect": { "sanity": -5, "csat": 5, "queue": -1 } },
+      { "text": "Confirm it's in the USB port, not the cup holder.", "effect": { "sanity": -8, "csat": -5, "queue": 1 } },
+      { "text": "Please verify you plugged it into your ears first.", "effect": { "sanity": 5, "csat": -15, "queue": 1 } }
+    ]
+  },
+  {
+    "ticketID": "TS-088",
+    "callerName": "Karen From Accounting",
+    "problem": "My softphone says 'registering' forever. I have a VERY IMPORTANT call.",
+    "answers": [
+      { "text": "I'll bounce your SIP registration real quick.", "effect": { "sanity": -3, "csat": 10, "queue": -1 } },
+      { "text": "Have you tried yelling at the loading spinner?", "effect": { "sanity": 8, "csat": -20, "queue": 2 } },
+      { "text": "Sounds like DNS. Or fate. Mostly DNS.", "effect": { "sanity": -10, "csat": -5, "queue": 0 } }
+    ]
+  },
+  {
+    "ticketID": "TS-314",
+    "callerName": "Intern Chad",
+    "problem": "People say I sound like a robot underwater. Is that normal?",
+    "answers": [
+      { "text": "That's packet loss. Checking your QoS profile.", "effect": { "sanity": -4, "csat": 12, "queue": -1 } },
+      { "text": "Maybe you ARE a robot underwater. Self-care tip.", "effect": { "sanity": 6, "csat": -12, "queue": 1 } },
+      { "text": "Increase bitrate and hope. Classic Tier 1 move.", "effect": { "sanity": -6, "csat": 0, "queue": 0 } }
+    ]
+  },
+  {
+    "ticketID": "TS-666",
+    "callerName": "The CEO's Assistant's Assistant",
+    "problem": "Executive suite can't hear each other on the all-hands bridge.",
+    "answers": [
+      { "text": "Mute audit in progress. Someone's holding spacebar as a lifestyle.", "effect": { "sanity": -5, "csat": 8, "queue": -1 } },
+      { "text": "Tell them it's a 'strategic silence initiative'.", "effect": { "sanity": 10, "csat": -25, "queue": 3 } },
+      { "text": "I'll escalate to someone who still has dreams.", "effect": { "sanity": -12, "csat": 5, "queue": -2 } }
+    ]
+  },
+  {
+    "ticketID": "TS-101",
+    "callerName": "Greg Who Restarts Everything",
+    "problem": "I already restarted my PC, router, modem, and soul. Still no dial tone.",
+    "answers": [
+      { "text": "Check if the softphone is even logged in.", "effect": { "sanity": -2, "csat": 10, "queue": -1 } },
+      { "text": "Restart your soul again. Counter-clockwise this time.", "effect": { "sanity": 7, "csat": -10, "queue": 1 } },
+      { "text": "Send me a screenshot of the entire internet.", "effect": { "sanity": -8, "csat": -8, "queue": 2 } }
+    ]
+  },
+  {
+    "ticketID": "TS-777",
+    "callerName": "Whispering Wendy",
+    "problem": "Callers say I'm too quiet. I am shouting.",
+    "answers": [
+      { "text": "Mic gain and headset check—input device might be wrong.", "effect": { "sanity": -3, "csat": 12, "queue": -1 } },
+      { "text": "Lean closer to the void.", "effect": { "sanity": 4, "csat": -8, "queue": 0 } },
+      { "text": "Enable 'Aggressive Presence' in settings. (It doesn't exist.)", "effect": { "sanity": 2, "csat": -15, "queue": 2 } }
+    ]
+  },
+  {
+    "ticketID": "TS-239",
+    "callerName": "Latency Larry",
+    "problem": "There's a two-second delay. I keep interrupting myself.",
+    "answers": [
+      { "text": "Running a jitter buffer tune and path check.", "effect": { "sanity": -4, "csat": 11, "queue": -1 } },
+      { "text": "Congratulations, you're time-traveling. Billable skill.", "effect": { "sanity": 8, "csat": -12, "queue": 1 } },
+      { "text": "Have you tried speaking slower than the delay?", "effect": { "sanity": 3, "csat": -5, "queue": 0 } }
+    ]
+  },
+  {
+    "ticketID": "TS-050",
+    "callerName": "Printer Adjacent Pat",
+    "problem": "My phone works fine until I print. Then everything dies.",
+    "answers": [
+      { "text": "VLAN / QoS collision with the print monster. Isolating traffic.", "effect": { "sanity": -6, "csat": 10, "queue": -1 } },
+      { "text": "Stop printing. Become paperless. Become free.", "effect": { "sanity": 9, "csat": -18, "queue": 2 } },
+      { "text": "Unplug the printer. Forever. For science.", "effect": { "sanity": 5, "csat": -10, "queue": 1 } }
+    ]
+  }
+]

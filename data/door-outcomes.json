@@ -1,0 +1,22 @@
+{
+  "doorOutcomes": [
+    {
+      "id": 0,
+      "key": "clean",
+      "text": "A shining, pristine porcelain throne. You sigh in peace.",
+      "sanityEffect": 10
+    },
+    {
+      "id": 1,
+      "key": "ogre",
+      "text": "An ogre belches, 'GIVE ME TOILET PAPER!' and slams the door.",
+      "sanityEffect": -20
+    },
+    {
+      "id": 2,
+      "key": "empty",
+      "text": "An empty, lonely stall. You just stand there for a moment.",
+      "sanityEffect": 0
+    }
+  ]
+}

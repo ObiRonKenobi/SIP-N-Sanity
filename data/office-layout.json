@@ -1,0 +1,11 @@
+{
+  "desks": [
+    { "id": "player", "x": 4, "y": 6, "label": "You" },
+    { "id": "santa", "x": 7, "y": 3, "label": "Regular Employee" },
+    { "id": "qa", "x": 2, "y": 2, "label": "QA Manager" },
+    { "id": "sales", "x": 9, "y": 5, "label": "Chatty Sales" },
+    { "id": "hw", "x": 5, "y": 1, "label": "Hardware Tech" }
+  ],
+  "breakroom": { "x": 11, "y": 1 },
+  "grid": { "width": 12, "height": 8 }
+}
