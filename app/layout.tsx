@@ -26,8 +26,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${pixel.variable} ${mono.variable} antialiased`}>
+    <html lang="en" className="h-full overflow-hidden">
+      <body
+        className={`${pixel.variable} ${mono.variable} h-full overflow-hidden antialiased`}
+      >
         {children}
       </body>
     </html>

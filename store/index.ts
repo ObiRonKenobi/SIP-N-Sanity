@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import doorData from "@/data/door-outcomes.json";
 import smokeData from "@/data/smoke-outcomes.json";
+import endings from "@/data/endings.json";
 import { pickRandomTicket, type Ticket } from "./tickets";
 
 export type GamePhase =
@@ -11,6 +12,8 @@ export type GamePhase =
   | "outage"
   | "won"
   | "lost";
+
+export type EndingKind = "sanity" | "csat" | "queue" | "won";
 
 export type DialogPayload = {
   title: string;
@@ -29,6 +32,9 @@ const OUTAGE_AT = 360; // 3:00
 
 /** Real ms per in-game minute. Full day ≈ 8 minutes. */
 export const TICK_MS = 1000;
+
+/** New ticket every N game minutes (= N real seconds at TICK_MS=1000). */
+export const TICKET_INTERVAL = 5;
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -52,6 +58,23 @@ function shuffleDoors(): DoorKey[] {
   return doors;
 }
 
+function pickEnding(kind: EndingKind): string {
+  const list = endings[kind];
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+/** Priority: sanity → csat → queue crash. */
+function checkLose(
+  sanity: number,
+  csat: number,
+  queue: number
+): { kind: EndingKind; quip: string } | null {
+  if (sanity <= 0) return { kind: "sanity", quip: pickEnding("sanity") };
+  if (csat <= 0) return { kind: "csat", quip: pickEnding("csat") };
+  if (queue >= 100) return { kind: "queue", quip: pickEnding("queue") };
+  return null;
+}
+
 type GameState = {
   sanity: number;
   csat: number;
@@ -71,6 +94,7 @@ type GameState = {
   dialog: DialogPayload;
   clockLabel: string;
   loseReason: string | null;
+  endingKind: EndingKind | null;
 
   startDay: () => void;
   pauseDay: () => void;
@@ -116,6 +140,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   dialog: null,
   clockLabel: formatClock(DAY_START_MINUTES),
   loseReason: null,
+  endingKind: null,
 
   startDay: () => {
     set({
@@ -131,7 +156,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       smokeRNG: 0,
       bathroomDoors: shuffleDoors(),
       activeTicket: pickRandomTicket(),
-      ticketCooldown: 8,
+      ticketCooldown: TICKET_INTERVAL,
       dialog: {
         title: "Shift Start",
         text: "Welcome to Tier 1. Survive until 5:00 PM. The queue does not sleep.",
@@ -139,6 +164,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       },
       clockLabel: formatClock(DAY_START_MINUTES),
       loseReason: null,
+      endingKind: null,
     });
     if (typeof window !== "undefined") {
       console.log("[SIP-N-Sanity] Day started. Transitions: 10:30, 12:00, 3:00");
@@ -160,7 +186,8 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     const nextTime = state.gameTime + 1;
     const lateDay = nextTime >= 360;
-    const queueGrowth = lateDay ? 2 : 1;
+    const queuePulse = nextTime % TICKET_INTERVAL === 0;
+    const queueGrowth = queuePulse ? (lateDay ? 2 : 1) : 0;
     let queue = clamp(state.queue + queueGrowth, 0, 100);
     let ticketCooldown = Math.max(0, state.ticketCooldown - 1);
     let activeTicket = state.activeTicket;
@@ -189,22 +216,23 @@ export const useGameStore = create<GameState>((set, get) => ({
       ticketCooldown <= 0
     ) {
       activeTicket = pickRandomTicket();
-      ticketCooldown = lateDay ? 5 : 8;
+      ticketCooldown = TICKET_INTERVAL;
     }
 
     let loseReason: string | null = null;
+    let endingKind: EndingKind | null = null;
 
-    if (state.sanity <= 0) {
+    const loss = checkLose(state.sanity, state.csat, queue);
+    if (loss) {
       nextPhase = "lost";
       isRunning = false;
-      loseReason = "Sanity collapsed. You are now one with the hold music.";
-    } else if (queue >= 100) {
-      nextPhase = "lost";
-      isRunning = false;
-      loseReason = "Queue hit 100. The ticket system achieved sentience and fired you.";
+      loseReason = loss.quip;
+      endingKind = loss.kind;
     } else if (nextTime >= DAY_END_MINUTES) {
       nextPhase = "won";
       isRunning = false;
+      loseReason = pickEnding("won");
+      endingKind = "won";
     }
 
     set({
@@ -226,6 +254,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         nextPhase === "won" ? DAY_END_MINUTES : Math.min(nextTime, DAY_END_MINUTES)
       ),
       loseReason,
+      endingKind,
     });
   },
 
@@ -236,16 +265,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     const queue = clamp(s.queue + (effect.queue ?? 0), 0, 100);
     const updates: Partial<GameState> = { sanity, csat, queue };
 
-    if (sanity <= 0) {
+    const loss = checkLose(sanity, csat, queue);
+    if (loss) {
       updates.currentPhase = "lost";
       updates.isRunning = false;
-      updates.loseReason =
-        "Sanity collapsed. You are now one with the hold music.";
-    } else if (queue >= 100) {
-      updates.currentPhase = "lost";
-      updates.isRunning = false;
-      updates.loseReason =
-        "Queue hit 100. The ticket system achieved sentience and fired you.";
+      updates.loseReason = loss.quip;
+      updates.endingKind = loss.kind;
     }
     set(updates);
   },
@@ -258,12 +283,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     get().applyEffect(answer.effect);
     set({
       activeTicket: null,
-      ticketCooldown: s.gameTime >= 360 ? 4 : 6,
+      ticketCooldown: TICKET_INTERVAL,
     });
   },
 
   spawnTicket: () => {
-    set({ activeTicket: pickRandomTicket(), ticketCooldown: 8 });
+    set({ activeTicket: pickRandomTicket(), ticketCooldown: TICKET_INTERVAL });
   },
 
   takeSmokeBreak: () => {
@@ -290,10 +315,14 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   completeBathroom: (doorIndex) => {
     const s = get();
+    // Already resolved / left bathroom — don't re-apply or soft-lock
+    if (s.bathroomCompleted || s.currentPhase !== "bathroom") return;
     const key = s.bathroomDoors[doorIndex];
     const outcome = doorData.doorOutcomes.find((d) => d.key === key);
     if (!outcome) return;
     get().applyEffect({ sanity: outcome.sanityEffect });
+    // If ogre/drain ended the run, don't leave a stuck bathroom overlay
+    if (get().currentPhase === "lost") return;
     set({
       dialog: {
         title: "Bathroom Gamble",
@@ -309,6 +338,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   finishBathroom: () => {
+    const s = get();
+    if (s.currentPhase === "lost" || s.currentPhase === "won") return;
+    if (s.bathroomCompleted && s.currentPhase === "console") return;
     set({
       bathroomCompleted: true,
       isBathroomTime: false,
@@ -316,7 +348,9 @@ export const useGameStore = create<GameState>((set, get) => ({
       clockLabel: formatClock(BATHROOM_RESUME),
       currentPhase: "console",
       isRunning: true,
-      ticketCooldown: 3,
+      ticketCooldown: TICKET_INTERVAL,
+      activeTicket: pickRandomTicket(),
+      dialog: null,
     });
   },
 
@@ -346,7 +380,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       isRunning: true,
       gameTime: LUNCH_AT + 5,
       clockLabel: formatClock(LUNCH_AT + 5),
-      ticketCooldown: 4,
+      ticketCooldown: TICKET_INTERVAL,
     });
   },
 
@@ -357,7 +391,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       isRunning: true,
       gameTime: OUTAGE_AT + 10,
       clockLabel: formatClock(OUTAGE_AT + 10),
-      ticketCooldown: 3,
+      ticketCooldown: TICKET_INTERVAL,
       dialog: {
         title: "Trunk Restored",
         text: "The SIP trunk staggers back online. Your wrists hate you.",
@@ -387,6 +421,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       dialog: null,
       clockLabel: formatClock(DAY_START_MINUTES),
       loseReason: null,
+      endingKind: null,
     });
   },
 }));

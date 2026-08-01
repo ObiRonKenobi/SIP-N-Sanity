@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Stage, Layer, Rect, Text, Circle, Line } from "react-konva";
+import { Stage, Layer, Rect, Text, Line, Group } from "react-konva";
 import layout from "@/data/office-layout.json";
 import { useGameStore } from "@/store";
 
@@ -170,6 +170,13 @@ export function LunchStealth() {
     }
   }, [player, enemies, breakroom, completeLunch, wider]);
 
+  const [pulse, setPulse] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setPulse((p) => p + 1), 400);
+    return () => window.clearInterval(id);
+  }, []);
+
   const cones = useMemo(() => {
     return enemies.map((en) => {
       const len = (wider ? en.visionLen * 1.35 : en.visionLen) * CELL;
@@ -186,16 +193,23 @@ export function LunchStealth() {
         cx + Math.cos(a1) * len,
         cy + Math.sin(a1) * len,
       ];
-      return { id: en.id, points };
+      const alpha = pulse % 2 === 0 ? 0.32 : 0.22;
+      return { id: en.id, points, alpha, cx, cy, dir: en.dir };
     });
-  }, [enemies, wider]);
+  }, [enemies, wider, pulse]);
+
+  const enemyColors: Record<string, string> = {
+    qa: "#c45c26",
+    sales: "#d4a017",
+    hw: "#e85d4c",
+  };
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2 p-2">
       <p className="font-pixel text-[10px] text-sky-200">{status}</p>
       <Stage width={stageW} height={stageH}>
         <Layer>
-          <Rect width={stageW} height={stageH} fill="#1a2740" />
+          <Rect width={stageW} height={stageH} fill="#152033" />
           {Array.from({ length: gridH }).map((_, y) =>
             Array.from({ length: gridW }).map((_, x) => (
               <Rect
@@ -204,61 +218,154 @@ export function LunchStealth() {
                 y={y * CELL}
                 width={CELL}
                 height={CELL}
+                fill={(x + y) % 2 === 0 ? "#1a2740" : "#182438"}
                 stroke="#243652"
                 strokeWidth={1}
               />
             ))
           )}
+          {/* breakroom glow */}
           <Rect
             x={breakroom.x * CELL}
             y={breakroom.y * CELL}
             width={CELL}
             height={CELL}
-            fill="#3ecf8e88"
+            fill={pulse % 2 === 0 ? "#3ecf8ecc" : "#3ecf8e99"}
+          />
+          <Rect
+            x={breakroom.x * CELL + 8}
+            y={breakroom.y * CELL + 10}
+            width={24}
+            height={6}
+            fill="#f5d76e"
+          />
+          <Rect
+            x={breakroom.x * CELL + 8}
+            y={breakroom.y * CELL + 16}
+            width={24}
+            height={6}
+            fill="#3ecf8e"
+          />
+          <Rect
+            x={breakroom.x * CELL + 8}
+            y={breakroom.y * CELL + 22}
+            width={24}
+            height={6}
+            fill="#f5d76e"
           />
           <Text
             text="BR"
-            x={breakroom.x * CELL + 8}
-            y={breakroom.y * CELL + 12}
-            fontSize={12}
+            x={breakroom.x * CELL}
+            y={breakroom.y * CELL + 2}
+            width={CELL}
+            align="center"
+            fontSize={9}
             fill="#dfffea"
+            fontFamily="monospace"
           />
           {cones.map((c) => (
             <Line
               key={c.id}
               points={c.points}
               closed
-              fill="rgba(232,93,76,0.28)"
-              stroke="rgba(232,93,76,0.5)"
+              fill={`rgba(232,93,76,${c.alpha})`}
+              stroke="rgba(255,160,120,0.65)"
+              strokeWidth={1}
             />
           ))}
-          {enemies.map((en) => (
-            <Circle
-              key={en.id}
-              x={en.pos.x * CELL + CELL / 2}
-              y={en.pos.y * CELL + CELL / 2}
-              radius={12}
-              fill="#e85d4c"
+          {/* Santa desk */}
+          <Group x={7 * CELL} y={3 * CELL}>
+            <Rect width={CELL} height={CELL} fill="#7f1d1d" />
+            <Rect x={8} y={6} width={24} height={20} fill="#b91c1c" />
+            <Rect x={10} y={18} width={20} height={10} fill="#f5f5f4" />
+          </Group>
+          {enemies.map((en) => {
+            const cx = en.pos.x * CELL + CELL / 2;
+            const cy = en.pos.y * CELL + CELL / 2;
+            const color = enemyColors[en.id] ?? "#e85d4c";
+            const fx = Math.cos(en.dir) * 10;
+            const fy = Math.sin(en.dir) * 10;
+            return (
+              <Group key={en.id}>
+                {/* body */}
+                <Rect
+                  x={cx - 10}
+                  y={cy - 10}
+                  width={20}
+                  height={20}
+                  fill={color}
+                  stroke="#0b1220"
+                  strokeWidth={2}
+                />
+                {/* head */}
+                <Rect
+                  x={cx - 6}
+                  y={cy - 14}
+                  width={12}
+                  height={8}
+                  fill="#e8c4a0"
+                  stroke="#0b1220"
+                  strokeWidth={1}
+                />
+                {/* facing tick */}
+                <Line
+                  points={[cx, cy, cx + fx, cy + fy]}
+                  stroke="#0b1220"
+                  strokeWidth={3}
+                />
+                <Text
+                  text={en.id === "qa" ? "QA" : en.id === "sales" ? "SL" : "HW"}
+                  x={cx - 10}
+                  y={cy + 12}
+                  width={20}
+                  align="center"
+                  fontSize={8}
+                  fill="#e2e8f0"
+                  fontFamily="monospace"
+                />
+              </Group>
+            );
+          })}
+          {/* player */}
+          <Group>
+            <Rect
+              x={player.x * CELL + 8}
+              y={player.y * CELL + 8}
+              width={24}
+              height={24}
+              fill="#5eb1ff"
+              stroke="#0b1220"
+              strokeWidth={2}
             />
-          ))}
-          <Circle
-            x={player.x * CELL + CELL / 2}
-            y={player.y * CELL + CELL / 2}
-            radius={12}
-            fill="#5eb1ff"
-          />
-          {/* Santa desk marker — lore only */}
-          <Rect
-            x={7 * CELL + 6}
-            y={3 * CELL + 6}
-            width={CELL - 12}
-            height={CELL - 12}
-            fill="#b91c1c"
-          />
+            <Rect
+              x={player.x * CELL + 12}
+              y={player.y * CELL + 4}
+              width={16}
+              height={10}
+              fill="#e8c4a0"
+            />
+            <Rect
+              x={player.x * CELL + 6}
+              y={player.y * CELL + 14}
+              width={4}
+              height={8}
+              fill="#1e293b"
+            />
+            <Text
+              text="YOU"
+              x={player.x * CELL}
+              y={player.y * CELL + 30}
+              width={CELL}
+              align="center"
+              fontSize={8}
+              fill="#93c5fd"
+              fontFamily="monospace"
+            />
+          </Group>
         </Layer>
       </Stage>
       <p className="font-mono text-[10px] text-slate-400">
-        Blue = you · Red = coworkers · Green = breakroom · Red triangle = vision
+        Blue = you · Warm colors = coworkers · Green = breakroom · Cones = vision
       </p>
     </div>
   );

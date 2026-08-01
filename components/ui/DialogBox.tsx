@@ -1,5 +1,7 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 type Tone = "neutral" | "good" | "bad" | "witch";
 
 const toneStyles: Record<Tone, string> = {
@@ -22,7 +24,11 @@ export function DialogBox({
 }) {
   return (
     <div className="pointer-events-auto fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4">
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 24, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 360, damping: 24 }}
         className={`pixel-frame max-w-md w-full border-4 p-4 shadow-[6px_6px_0_#0b1220] ${toneStyles[tone]}`}
         role="dialog"
         aria-labelledby="dialog-title"
@@ -40,7 +46,7 @@ export function DialogBox({
         >
           Acknowledge
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 }

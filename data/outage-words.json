@@ -1,0 +1,20 @@
+[
+  "JITTER",
+  "SIP",
+  "LATENCY",
+  "CODEC",
+  "RTP",
+  "QoS",
+  "MOS",
+  "SBC",
+  "REGISTER",
+  "BYE",
+  "INVITE",
+  "NAT",
+  "DTMF",
+  "ECHO",
+  "LOSS",
+  "PING",
+  "TRUNK",
+  "HOLD"
+]

@@ -75,11 +75,11 @@ Pop-up tickets with multiple-choice answers. Balance three meters:
 
 | Meter | Range | Notes |
 | --- | --- | --- |
-| Sanity | 0–100 | Drains on foolish customers / office chaos; refilled via breaks |
-| CSAT | 0–100 | Drops on sarcastic / wrong answers |
+| Sanity | 0–100 | Drains on foolish customers / office chaos; refilled via breaks. **Game over at 0** |
+| CSAT | 0–100 | Drops on sarcastic / wrong answers. **Game over at 0** |
 | Queue | 0–99 | Climbs constantly; **game over at 100** |
 
-**Game over** also if Sanity hits 0. **Win** if you survive until 5:00 PM.
+**Game over** if Sanity hits 0, CSAT hits 0, or Queue hits 100. **Win** if you survive until 5:00 PM. Ending screens pull a random quip from `data/endings.json` per scenario.
 
 ### 10:30 AM — The Bathroom Gamble
 Luck mini-game: pick one of three stall doors.
