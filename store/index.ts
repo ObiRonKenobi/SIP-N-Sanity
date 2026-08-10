@@ -10,10 +10,12 @@ export type GamePhase =
   | "bathroom"
   | "lunch"
   | "outage"
+  | "smoke"
   | "won"
   | "lost";
 
 export type EndingKind = "sanity" | "csat" | "queue" | "won";
+export type SmokeOutcomeId = "win" | "lose" | null;
 
 export type DialogPayload = {
   title: string;
@@ -82,7 +84,12 @@ type GameState = {
   gameTime: number;
   currentPhase: GamePhase;
   isRunning: boolean;
+  isPaused: boolean;
+  muted: boolean;
   hasSmoked: boolean;
+  smokeOutcome: SmokeOutcomeId;
+  coffeeUsesLeft: number;
+  lastCoffeeAt: number;
   isBathroomTime: boolean;
   bathroomCompleted: boolean;
   lunchCompleted: boolean;
@@ -98,6 +105,8 @@ type GameState = {
 
   startDay: () => void;
   pauseDay: () => void;
+  togglePause: () => void;
+  toggleMute: () => void;
   resumeConsole: () => void;
   tick: () => void;
   applyEffect: (effect: {
@@ -108,6 +117,8 @@ type GameState = {
   answerTicket: (answerIndex: number) => void;
   spawnTicket: () => void;
   takeSmokeBreak: () => void;
+  finishSmokeBreak: () => void;
+  drinkCoffee: () => void;
   completeBathroom: (doorIndex: number) => void;
   finishBathroom: () => void;
   completeLunch: (success: boolean) => void;
@@ -128,7 +139,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   gameTime: DAY_START_MINUTES,
   currentPhase: "idle",
   isRunning: false,
+  isPaused: false,
+  muted: false,
   hasSmoked: false,
+  smokeOutcome: null,
+  coffeeUsesLeft: 3,
+  lastCoffeeAt: -999,
   isBathroomTime: false,
   bathroomCompleted: false,
   lunchCompleted: false,
@@ -148,7 +164,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       gameTime: DAY_START_MINUTES,
       currentPhase: "console",
       isRunning: true,
+      isPaused: false,
       hasSmoked: false,
+      smokeOutcome: null,
+      coffeeUsesLeft: 3,
+      lastCoffeeAt: -999,
       isBathroomTime: false,
       bathroomCompleted: false,
       lunchCompleted: false,
@@ -171,18 +191,34 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  pauseDay: () => set({ isRunning: false }),
+  pauseDay: () => set({ isRunning: false, isPaused: true }),
+
+  togglePause: () => {
+    const s = get();
+    if (s.currentPhase === "idle" || s.currentPhase === "won" || s.currentPhase === "lost")
+      return;
+    if (s.currentPhase !== "console") return;
+    if (s.isPaused) {
+      set({ isPaused: false, isRunning: true });
+    } else {
+      set({ isPaused: true, isRunning: false });
+    }
+  },
+
+  toggleMute: () => set((s) => ({ muted: !s.muted })),
 
   resumeConsole: () =>
     set({
       currentPhase: "console",
       isRunning: true,
+      isPaused: false,
       isBathroomTime: false,
     }),
 
   tick: () => {
     const state = get();
-    if (!state.isRunning || state.currentPhase !== "console") return;
+    if (!state.isRunning || state.isPaused || state.currentPhase !== "console")
+      return;
 
     const nextTime = state.gameTime + 1;
     const lateDay = nextTime >= 360;
@@ -294,26 +330,86 @@ export const useGameStore = create<GameState>((set, get) => ({
   takeSmokeBreak: () => {
     const s = get();
     if (s.hasSmoked) return;
-    if (s.currentPhase === "bathroom" || s.currentPhase === "lunch") return;
+    if (
+      s.currentPhase === "bathroom" ||
+      s.currentPhase === "lunch" ||
+      s.currentPhase === "outage" ||
+      s.currentPhase === "smoke"
+    )
+      return;
 
     const rng = Math.random();
     const win = smokeData.smokeBreakOutcomes[0];
-    const lose = smokeData.smokeBreakOutcomes[1];
-    const outcome = rng < win.probability ? win : lose;
+    const outcomeId: SmokeOutcomeId = rng < win.probability ? "win" : "lose";
+    const outcome =
+      outcomeId === "win"
+        ? smokeData.smokeBreakOutcomes[0]
+        : smokeData.smokeBreakOutcomes[1];
 
     get().applyEffect({ sanity: outcome.sanityEffect });
+    if (get().currentPhase === "lost") {
+      set({ hasSmoked: true, smokeRNG: rng, smokeOutcome: outcomeId });
+      return;
+    }
     set({
       hasSmoked: true,
       smokeRNG: rng,
+      smokeOutcome: outcomeId,
+      currentPhase: "smoke",
+      isRunning: false,
+      isPaused: false,
+    });
+  },
+
+  finishSmokeBreak: () => {
+    const s = get();
+    if (s.currentPhase === "lost" || s.currentPhase === "won") return;
+    set({
+      currentPhase: "console",
+      isRunning: true,
+      isPaused: false,
+      dialog: null,
+      ticketCooldown: Math.min(s.ticketCooldown, 2),
+      activeTicket: s.activeTicket ?? pickRandomTicket(),
+    });
+  },
+
+  drinkCoffee: () => {
+    const s = get();
+    if (s.currentPhase !== "console" || s.isPaused) return;
+    if (s.coffeeUsesLeft <= 0) {
+      set({
+        dialog: {
+          title: "Coffee Station",
+          text: "The urn is empty. So is your soul. Try again next shift.",
+          tone: "bad",
+        },
+      });
+      return;
+    }
+    if (s.gameTime - s.lastCoffeeAt < 40) {
+      set({
+        dialog: {
+          title: "Coffee Station",
+          text: "Too soon. Your heart is already a SIP trunk.",
+          tone: "neutral",
+        },
+      });
+      return;
+    }
+    get().applyEffect({ sanity: 8 });
+    set({
+      coffeeUsesLeft: s.coffeeUsesLeft - 1,
+      lastCoffeeAt: s.gameTime,
       dialog: {
-        title: outcome.id === "win" ? "Smoke Break" : "The Witch Boss",
-        text: outcome.text,
-        tone: outcome.id === "win" ? "good" : "witch",
+        title: "Coffee Station",
+        text: `Burnt office coffee. Sanity +8. Cups left today: ${s.coffeeUsesLeft - 1}.`,
+        tone: "good",
       },
     });
   },
 
-  completeBathroom: (doorIndex) => {
+  completeBathroom: (doorIndex: number) => {
     const s = get();
     // Already resolved / left bathroom — don't re-apply or soft-lock
     if (s.bathroomCompleted || s.currentPhase !== "bathroom") return;
@@ -368,8 +464,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       get().applyEffect({ sanity: -15 });
       set({
         dialog: {
-          title: "Caught",
-          text: "Vision cone acquired. Back to your desk, agent.",
+          title: "Cornered",
+          text: "They just needed 'one quick second.' Twenty minutes later your Sanity is toast. Sanity -15.",
           tone: "bad",
         },
       });
@@ -409,7 +505,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       gameTime: DAY_START_MINUTES,
       currentPhase: "idle",
       isRunning: false,
+      isPaused: false,
+      muted: get().muted,
       hasSmoked: false,
+      smokeOutcome: null,
+      coffeeUsesLeft: 3,
+      lastCoffeeAt: -999,
       isBathroomTime: false,
       bathroomCompleted: false,
       lunchCompleted: false,

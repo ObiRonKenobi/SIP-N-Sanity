@@ -18,7 +18,12 @@ A sarcastic, 16-bit time-management and survival game where you play as a Tier 1
 
 - **Visual Style:** Cute, vibrant, 16-bit isometric pixel art. The adorable aesthetic contrasts with soul-crushing tech support reality.
 - **Humor & Tone:** Dry, sarcastic, and highly relatable to customer service / office workers. Passive-aggressive tooltips, absurd corporate jargon, realistic VoIP headaches.
-- **The "Santa" Anomaly:** One agent is clearly Santa Claus (suit, beard, takes calls). Lore rule: **no one ever acknowledges this.** Tooltip only: *"He is a regular employee working off-season."*
+- **Cast (locked pending art):**
+  - **Player / hero** — tired Tier-1 agent (glasses, goatee, hoodie, headset). Existing sprites in `public/sprites/characters/player/`.
+  - **Office Witch** — the boss / manager. Opposite-facing desk (`desk-manager.png`). Baseball bat energy.
+  - **Santa** — clearly Santa in a suit on calls. Lore: **no one ever acknowledges why he’s there.** He is slightly annoying; tooltip only: *"He is a regular employee working off-season."*
+  - **Floor clones (6–8 desks)** — identical coworkers: blue eyes, blonde hair, formally dressed Jewish office workers. **Same face/body**; tell them apart only by **different colored yarmulkes**. Reuse one base sprite + recolor the kippah (or thin Gemini variants).
+- **Clone chatter (pending):** speech bubbles in **Hebrew** (e.g. bagels / office kvetch lines). SFX: recorded **“chchchchchchch”** voice fritter (not TTS). English placeholders OK until audio + copy land.
 - **Placeholders first:** CSS/canvas placeholders until Gemini-generated sprites are swapped in (see `docs/gemini-sprite-prompts.md`).
 
 ---
@@ -92,8 +97,9 @@ Luck mini-game: pick one of three stall doors.
 
 Resume console ~10:40 AM.
 
-### 12:00 PM — Lunch Stealth
-Top-down grid stealth. Reach the breakroom while avoiding vision cones (QA Manager, Chatty Salesperson, Hardware Tech). Caught → Sanity drain + desk reset. Breakroom → Sanity +10.
+### 12:00 PM — Lunch Stealth (same isometric office)
+At noon, coworkers **stand up from their desks** and wander the floor in the same isometric office view. Objective: sneak to the **breakroom doorway** without getting pulled into a conversation. Caught talking → Sanity drain and back to work. Reach breakroom → Sanity +10.
+
 
 ### 3:00 PM — The Outage
 Typing defense: falling red tickets with VoIP jargon (`JITTER`, `PACKET LOSS`, etc.). Type to destroy. Ticket hits bottom → Queue +2.
@@ -121,7 +127,8 @@ Witch yelling must **not** fire during bathroom or lunch mini-games.
 - `smokeRNG: number` — RNG when smoke is clicked
 - `bathroomDoors: array` — shuffled outcomes for clean / ogre / empty
 
-Central `setInterval` advances time and queue; phase transitions at 10:30, 12:00, 3:00. Late day: queue pressure increases; stealth cones widen.
+Central `setInterval` advances time and queue; phase transitions at 10:30, 12:00, 3:00. Late day: queue pressure increases. Lunch sneak uses talk-radii on the isometric floor (not vision cones / not top-down).
+
 
 ---
 
@@ -192,15 +199,16 @@ Do **not** build mini-game art before the global state machine and Smoke Break l
 
 ## 10. Hosting Handoff (other workspace)
 
-**Out of scope in this repo's development workspace.**
+**Out of scope for day-to-day play in this repo’s primary workflow — but Docker artifacts live here for copy/paste.**
 
 When the game is playable locally:
 
-1. Export / clone the playable Next.js build into the deployment workspace  
-2. Containerize with Docker (production `next start` or static export as chosen there)  
-3. Serve live on **rbyt3r.com**
+1. See [`docs/HOSTING.md`](docs/HOSTING.md)  
+2. `docker compose up --build` → port 3000  
+3. Reverse-proxy on **rbyt3r.com** from the deployment workspace  
 
-No Dockerfile / compose / reverse proxy is required in the initial development workspace.
+Dockerfile + compose are in the repo root. Drop Gemini sprites into `public/sprites/` before building so they ship in the image.
+
 
 ---
 

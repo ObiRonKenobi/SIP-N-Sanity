@@ -1,372 +1,277 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Stage, Layer, Rect, Text, Line, Group } from "react-konva";
-import layout from "@/data/office-layout.json";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useGameStore } from "@/store";
+import { SpriteImg } from "@/components/ui/SpriteImg";
+import { SPRITES } from "@/lib/sprites";
+import lunchLayout from "@/data/lunch-iso-layout.json";
 
-type Pos = { x: number; y: number };
+type Pos = { x: number; y: number }; // percent of stage 0–100
 
-type Enemy = {
+type Walker = {
   id: string;
+  label: string;
+  color: string;
   pos: Pos;
   path: Pos[];
   pathIndex: number;
-  dir: number; // radians facing
-  visionLen: number;
-  visionAngle: number;
+  talkRadius: number;
 };
 
-const CELL = 40;
-
-function inCone(
-  enemy: Enemy,
-  target: Pos,
-  wider: boolean
-): boolean {
-  const len = wider ? enemy.visionLen * 1.35 : enemy.visionLen;
-  const ang = wider ? enemy.visionAngle * 1.2 : enemy.visionAngle;
-  const dx = target.x - enemy.pos.x;
-  const dy = target.y - enemy.pos.y;
-  const dist = Math.hypot(dx, dy);
-  if (dist > len || dist < 0.2) return false;
-  const bearing = Math.atan2(dy, dx);
-  let diff = bearing - enemy.dir;
-  while (diff > Math.PI) diff -= Math.PI * 2;
-  while (diff < -Math.PI) diff += Math.PI * 2;
-  return Math.abs(diff) <= ang / 2;
+function dist(a: Pos, b: Pos) {
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+  return Math.hypot(dx, dy);
 }
 
+function stepToward(from: Pos, to: Pos, speed: number): Pos {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const d = Math.hypot(dx, dy) || 1;
+  if (d <= speed) return { ...to };
+  return { x: from.x + (dx / d) * speed, y: from.y + (dy / d) * speed };
+}
+
+/**
+ * Lunch sneak — same isometric office view as the main game.
+ * Coworkers leave desks and wander; reach the breakroom door without
+ * getting cornered into a conversation (sanity hit).
+ */
 export function LunchStealth() {
   const completeLunch = useGameStore((s) => s.completeLunch);
-  const gameTime = useGameStore((s) => s.gameTime);
-  const wider = gameTime >= 360;
-
-  const gridW = layout.grid.width;
-  const gridH = layout.grid.height;
-  const breakroom = layout.breakroom;
-
-  const [player, setPlayer] = useState<Pos>({ x: 4, y: 6 });
-  const [status, setStatus] = useState("Reach the breakroom. WASD / arrows.");
+  const [player, setPlayer] = useState<Pos>(lunchLayout.playerStart);
+  const [keys, setKeys] = useState<Record<string, boolean>>({});
+  const [status, setStatus] = useState(
+    "Sneak to the breakroom. Don't get pulled into a chat."
+  );
   const done = useRef(false);
 
-  const [enemies, setEnemies] = useState<Enemy[]>(() => [
-    {
-      id: "qa",
-      pos: { x: 2, y: 2 },
-      path: [
-        { x: 2, y: 2 },
-        { x: 5, y: 2 },
-        { x: 5, y: 4 },
-        { x: 2, y: 4 },
-      ],
+  const [walkers, setWalkers] = useState<Walker[]>(() =>
+    lunchLayout.walkers.map((w) => ({
+      ...w,
+      pos: { ...w.path[0] },
       pathIndex: 0,
-      dir: 0,
-      visionLen: 3.2,
-      visionAngle: Math.PI / 2.4,
-    },
-    {
-      id: "sales",
-      pos: { x: 9, y: 5 },
-      path: [
-        { x: 9, y: 5 },
-        { x: 9, y: 2 },
-        { x: 7, y: 2 },
-        { x: 7, y: 5 },
-      ],
-      pathIndex: 0,
-      dir: Math.PI,
-      visionLen: 3,
-      visionAngle: Math.PI / 2.6,
-    },
-    {
-      id: "hw",
-      pos: { x: 5, y: 1 },
-      path: [
-        { x: 5, y: 1 },
-        { x: 8, y: 1 },
-        { x: 8, y: 3 },
-        { x: 5, y: 3 },
-      ],
-      pathIndex: 0,
-      dir: 0,
-      visionLen: 2.8,
-      visionAngle: Math.PI / 2.5,
-    },
-  ]);
-
-  const stageW = gridW * CELL;
-  const stageH = gridH * CELL;
-
-  const movePlayer = useCallback(
-    (dx: number, dy: number) => {
-      if (done.current) return;
-      setPlayer((p) => {
-        const nx = Math.max(0, Math.min(gridW - 1, p.x + dx));
-        const ny = Math.max(0, Math.min(gridH - 1, p.y + dy));
-        return { x: nx, y: ny };
-      });
-    },
-    [gridW, gridH]
+    }))
   );
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
+    const down = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
-      if (k === "w" || k === "arrowup") movePlayer(0, -1);
-      if (k === "s" || k === "arrowdown") movePlayer(0, 1);
-      if (k === "a" || k === "arrowleft") movePlayer(-1, 0);
-      if (k === "d" || k === "arrowright") movePlayer(1, 0);
+      if (["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) {
+        e.preventDefault();
+        setKeys((prev) => ({ ...prev, [k]: true }));
+      }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const up = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      setKeys((prev) => ({ ...prev, [k]: false }));
+    };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+    };
+  }, []);
+
+  const movePlayer = useCallback(() => {
+    if (done.current) return;
+    setPlayer((p) => {
+      let { x, y } = p;
+      const speed = lunchLayout.playerSpeed;
+      if (keys.w || keys.arrowup) y -= speed;
+      if (keys.s || keys.arrowdown) y += speed;
+      if (keys.a || keys.arrowleft) x -= speed;
+      if (keys.d || keys.arrowright) x += speed;
+      x = Math.max(8, Math.min(92, x));
+      y = Math.max(28, Math.min(88, y));
+      return { x, y };
+    });
+  }, [keys]);
+
+  useEffect(() => {
+    const id = window.setInterval(movePlayer, 50);
+    return () => window.clearInterval(id);
   }, [movePlayer]);
 
-  // Enemy patrol
+  // NPC patrol
   useEffect(() => {
     const id = window.setInterval(() => {
-      setEnemies((list) =>
-        list.map((en) => {
-          const nextIndex = (en.pathIndex + 1) % en.path.length;
-          const target = en.path[nextIndex];
-          const dx = target.x - en.pos.x;
-          const dy = target.y - en.pos.y;
-          let pos = { ...en.pos };
-          let pathIndex = en.pathIndex;
-          let dir = en.dir;
-          if (dx !== 0 || dy !== 0) {
-            pos = {
-              x: en.pos.x + Math.sign(dx),
-              y: en.pos.y + Math.sign(dy),
-            };
-            dir = Math.atan2(Math.sign(dy), Math.sign(dx));
-            if (pos.x === target.x && pos.y === target.y) pathIndex = nextIndex;
-          } else {
-            pathIndex = nextIndex;
+      if (done.current) return;
+      setWalkers((list) =>
+        list.map((w) => {
+          const target = w.path[w.pathIndex];
+          const next = stepToward(w.pos, target, lunchLayout.npcSpeed);
+          let pathIndex = w.pathIndex;
+          if (dist(next, target) < 0.4) {
+            pathIndex = (w.pathIndex + 1) % w.path.length;
           }
-          return { ...en, pos, pathIndex, dir };
+          return { ...w, pos: next, pathIndex };
         })
       );
-    }, 550);
+    }, 80);
     return () => window.clearInterval(id);
   }, []);
 
-  // Win / catch checks
+  // Win / catch
   useEffect(() => {
     if (done.current) return;
-    if (player.x === breakroom.x && player.y === breakroom.y) {
+    const br = lunchLayout.breakroom;
+    if (
+      player.x >= br.x &&
+      player.x <= br.x + br.w &&
+      player.y >= br.y &&
+      player.y <= br.y + br.h
+    ) {
       done.current = true;
-      setStatus("Breakroom secured.");
-      window.setTimeout(() => completeLunch(true), 600);
+      setStatus("Breakroom! Sandwich acquired.");
+      window.setTimeout(() => completeLunch(true), 700);
       return;
     }
-    for (const en of enemies) {
-      if (inCone(en, player, wider)) {
+    for (const w of walkers) {
+      if (dist(player, w.pos) < w.talkRadius) {
         done.current = true;
-        setStatus("Spotted!");
-        window.setTimeout(() => completeLunch(false), 600);
+        setStatus(`${w.label} cornered you for a "quick question."`);
+        window.setTimeout(() => completeLunch(false), 900);
         return;
       }
     }
-  }, [player, enemies, breakroom, completeLunch, wider]);
-
-  const [pulse, setPulse] = useState(0);
-
-  useEffect(() => {
-    const id = window.setInterval(() => setPulse((p) => p + 1), 400);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const cones = useMemo(() => {
-    return enemies.map((en) => {
-      const len = (wider ? en.visionLen * 1.35 : en.visionLen) * CELL;
-      const ang = wider ? en.visionAngle * 1.2 : en.visionAngle;
-      const cx = en.pos.x * CELL + CELL / 2;
-      const cy = en.pos.y * CELL + CELL / 2;
-      const a0 = en.dir - ang / 2;
-      const a1 = en.dir + ang / 2;
-      const points = [
-        cx,
-        cy,
-        cx + Math.cos(a0) * len,
-        cy + Math.sin(a0) * len,
-        cx + Math.cos(a1) * len,
-        cy + Math.sin(a1) * len,
-      ];
-      const alpha = pulse % 2 === 0 ? 0.32 : 0.22;
-      return { id: en.id, points, alpha, cx, cy, dir: en.dir };
-    });
-  }, [enemies, wider, pulse]);
-
-  const enemyColors: Record<string, string> = {
-    qa: "#c45c26",
-    sales: "#d4a017",
-    hw: "#e85d4c",
-  };
+  }, [player, walkers, completeLunch]);
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-2 p-2">
-      <p className="font-pixel text-[10px] text-sky-200">{status}</p>
-      <Stage width={stageW} height={stageH}>
-        <Layer>
-          <Rect width={stageW} height={stageH} fill="#152033" />
-          {Array.from({ length: gridH }).map((_, y) =>
-            Array.from({ length: gridW }).map((_, x) => (
-              <Rect
-                key={`${x}-${y}`}
-                x={x * CELL}
-                y={y * CELL}
-                width={CELL}
-                height={CELL}
-                fill={(x + y) % 2 === 0 ? "#1a2740" : "#182438"}
-                stroke="#243652"
-                strokeWidth={1}
-              />
-            ))
-          )}
-          {/* breakroom glow */}
-          <Rect
-            x={breakroom.x * CELL}
-            y={breakroom.y * CELL}
-            width={CELL}
-            height={CELL}
-            fill={pulse % 2 === 0 ? "#3ecf8ecc" : "#3ecf8e99"}
-          />
-          <Rect
-            x={breakroom.x * CELL + 8}
-            y={breakroom.y * CELL + 10}
-            width={24}
-            height={6}
-            fill="#f5d76e"
-          />
-          <Rect
-            x={breakroom.x * CELL + 8}
-            y={breakroom.y * CELL + 16}
-            width={24}
-            height={6}
-            fill="#3ecf8e"
-          />
-          <Rect
-            x={breakroom.x * CELL + 8}
-            y={breakroom.y * CELL + 22}
-            width={24}
-            height={6}
-            fill="#f5d76e"
-          />
-          <Text
-            text="BR"
-            x={breakroom.x * CELL}
-            y={breakroom.y * CELL + 2}
-            width={CELL}
-            align="center"
-            fontSize={9}
-            fill="#dfffea"
-            fontFamily="monospace"
-          />
-          {cones.map((c) => (
-            <Line
-              key={c.id}
-              points={c.points}
-              closed
-              fill={`rgba(232,93,76,${c.alpha})`}
-              stroke="rgba(255,160,120,0.65)"
-              strokeWidth={1}
+    <div className="relative flex h-full min-h-0 flex-col overflow-hidden bg-[#121c2c]">
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        <SpriteImg
+          src={SPRITES.officeIso}
+          alt="Office"
+          className="absolute inset-0 h-full w-full object-cover"
+          fallback={
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, #3a516e 0%, #243652 40%, #1a2740 100%)",
+              }}
             />
-          ))}
-          {/* Santa desk */}
-          <Group x={7 * CELL} y={3 * CELL}>
-            <Rect width={CELL} height={CELL} fill="#7f1d1d" />
-            <Rect x={8} y={6} width={24} height={20} fill="#b91c1c" />
-            <Rect x={10} y={18} width={20} height={10} fill="#f5f5f4" />
-          </Group>
-          {enemies.map((en) => {
-            const cx = en.pos.x * CELL + CELL / 2;
-            const cy = en.pos.y * CELL + CELL / 2;
-            const color = enemyColors[en.id] ?? "#e85d4c";
-            const fx = Math.cos(en.dir) * 10;
-            const fy = Math.sin(en.dir) * 10;
-            return (
-              <Group key={en.id}>
-                {/* body */}
-                <Rect
-                  x={cx - 10}
-                  y={cy - 10}
-                  width={20}
-                  height={20}
-                  fill={color}
-                  stroke="#0b1220"
-                  strokeWidth={2}
+          }
+        />
+
+        {/* Desk footprints (placeholders until furniture sprites) */}
+        {lunchLayout.desks.map((d, i) => (
+          <div
+            key={i}
+            className="pointer-events-none absolute z-[2]"
+            style={{
+              left: `${d.x}%`,
+              top: `${d.y}%`,
+              width: `${d.w}%`,
+              height: `${d.h}%`,
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <SpriteImg
+              src={i % 2 === 0 ? SPRITES.deskIso : SPRITES.deskIsoAlt}
+              className="h-full w-full object-contain"
+              fallback={
+                <div
+                  className="h-full w-full border-2 border-[#0b1220] bg-[#6b4f2e]/90"
+                  style={{ boxShadow: "2px 3px 0 #3a2a18" }}
                 />
-                {/* head */}
-                <Rect
-                  x={cx - 6}
-                  y={cy - 14}
-                  width={12}
-                  height={8}
-                  fill="#e8c4a0"
-                  stroke="#0b1220"
-                  strokeWidth={1}
-                />
-                {/* facing tick */}
-                <Line
-                  points={[cx, cy, cx + fx, cy + fy]}
-                  stroke="#0b1220"
-                  strokeWidth={3}
-                />
-                <Text
-                  text={en.id === "qa" ? "QA" : en.id === "sales" ? "SL" : "HW"}
-                  x={cx - 10}
-                  y={cy + 12}
-                  width={20}
-                  align="center"
-                  fontSize={8}
-                  fill="#e2e8f0"
-                  fontFamily="monospace"
-                />
-              </Group>
-            );
-          })}
-          {/* player */}
-          <Group>
-            <Rect
-              x={player.x * CELL + 8}
-              y={player.y * CELL + 8}
-              width={24}
-              height={24}
-              fill="#5eb1ff"
-              stroke="#0b1220"
-              strokeWidth={2}
+              }
             />
-            <Rect
-              x={player.x * CELL + 12}
-              y={player.y * CELL + 4}
-              width={16}
-              height={10}
-              fill="#e8c4a0"
+          </div>
+        ))}
+
+        {/* Breakroom zone hint */}
+        <div
+          className="pointer-events-none absolute z-[1] border-2 border-dashed border-emerald-400/50 bg-emerald-400/10"
+          style={{
+            left: `${lunchLayout.breakroom.x}%`,
+            top: `${lunchLayout.breakroom.y}%`,
+            width: `${lunchLayout.breakroom.w}%`,
+            height: `${lunchLayout.breakroom.h}%`,
+          }}
+        >
+          <span className="absolute bottom-0 left-1 font-pixel text-[8px] text-emerald-200">
+            BREAKROOM
+          </span>
+        </div>
+
+        {/* Walkers (got up from desks) */}
+        {walkers.map((w) => (
+          <div
+            key={w.id}
+            className="absolute z-[4] flex flex-col items-center"
+            style={{
+              left: `${w.pos.x}%`,
+              top: `${w.pos.y}%`,
+              transform: "translate(-50%, -80%)",
+            }}
+          >
+            <div
+              className="pixel-sprite h-10 w-8 border-2 border-[#0b1220]"
+              style={{ background: w.color }}
+              title={w.label}
+            >
+              <div className="mx-auto mt-0.5 h-2.5 w-5 bg-[#e8c4a0]" />
+              {w.id === "tech" && (
+                <div className="mx-auto h-1 w-4 bg-slate-900" />
+              )}
+              {w.id === "santa" && (
+                <div className="mx-auto h-1.5 w-6 bg-stone-100" />
+              )}
+            </div>
+            <span className="mt-0.5 rounded bg-black/50 px-1 font-mono text-[7px] text-white">
+              {w.label}
+            </span>
+            {/* talk aura */}
+            <div
+              className="pointer-events-none absolute rounded-full border border-rose-400/40 bg-rose-400/10"
+              style={{
+                width: `${w.talkRadius * 2.2}%`,
+                height: `${w.talkRadius * 1.4}vh`,
+                minWidth: 36,
+                minHeight: 24,
+                top: "40%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: -1,
+              }}
             />
-            <Rect
-              x={player.x * CELL + 6}
-              y={player.y * CELL + 14}
-              width={4}
-              height={8}
-              fill="#1e293b"
-            />
-            <Text
-              text="YOU"
-              x={player.x * CELL}
-              y={player.y * CELL + 30}
-              width={CELL}
-              align="center"
-              fontSize={8}
-              fill="#93c5fd"
-              fontFamily="monospace"
-            />
-          </Group>
-        </Layer>
-      </Stage>
-      <p className="font-mono text-[10px] text-slate-400">
-        Blue = you · Warm colors = coworkers · Green = breakroom · Cones = vision
-      </p>
+          </div>
+        ))}
+
+        {/* Player */}
+        <div
+          className="absolute z-[5] flex flex-col items-center"
+          style={{
+            left: `${player.x}%`,
+            top: `${player.y}%`,
+            transform: "translate(-50%, -80%)",
+          }}
+        >
+          <SpriteImg
+            src={SPRITES.playerDesk("idle")}
+            className="h-11 w-8 object-contain"
+            fallback={
+              <div className="pixel-sprite h-10 w-8 border-2 border-[#0b1220] bg-[#3d6ea8]">
+                <div className="mx-auto mt-0.5 h-2.5 w-5 bg-[#e8c4a0]" />
+                <div className="mx-auto mt-0.5 h-1 w-4 bg-amber-300" />
+              </div>
+            }
+          />
+          <span className="mt-0.5 rounded bg-sky-900/80 px-1 font-mono text-[7px] text-sky-100">
+            YOU
+          </span>
+        </div>
+      </div>
+
+      <div className="shrink-0 border-t-2 border-[#0b1220] bg-[#152033] px-3 py-2">
+        <p className="font-pixel text-[10px] text-amber-200">{status}</p>
+        <p className="font-mono text-[9px] text-slate-500">
+          WASD / arrows · Avoid coworkers (they will talk) · Green zone = breakroom
+        </p>
+      </div>
     </div>
   );
 }

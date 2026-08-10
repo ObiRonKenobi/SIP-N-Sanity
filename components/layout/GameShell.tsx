@@ -9,6 +9,7 @@ import { SmokeBreakButton } from "@/components/ui/SmokeBreakButton";
 import { DialogBox } from "@/components/ui/DialogBox";
 import { EndScreen } from "@/components/ui/EndScreen";
 import { OfficeBackground } from "@/components/office/OfficeBackground";
+import { setSfxMuted, playCoffee } from "@/components/ui/sfx";
 import dynamic from "next/dynamic";
 
 const BathroomGamble = dynamic(
@@ -30,22 +31,48 @@ const TypingOutage = dynamic(
     ),
   { ssr: false }
 );
+const SmokeBreakScene = dynamic(
+  () =>
+    import("@/app/games/smoke-break/SmokeBreakScene").then(
+      (m) => m.SmokeBreakScene
+    ),
+  { ssr: false }
+);
 
 export function GameShell() {
   const phase = useGameStore((s) => s.currentPhase);
   const tick = useGameStore((s) => s.tick);
   const isRunning = useGameStore((s) => s.isRunning);
+  const isPaused = useGameStore((s) => s.isPaused);
+  const muted = useGameStore((s) => s.muted);
   const startDay = useGameStore((s) => s.startDay);
   const dialog = useGameStore((s) => s.dialog);
   const clearDialog = useGameStore((s) => s.clearDialog);
   const finishBathroom = useGameStore((s) => s.finishBathroom);
   const isBathroomTime = useGameStore((s) => s.isBathroomTime);
+  const togglePause = useGameStore((s) => s.togglePause);
+  const toggleMute = useGameStore((s) => s.toggleMute);
+  const drinkCoffee = useGameStore((s) => s.drinkCoffee);
+  const coffeeUsesLeft = useGameStore((s) => s.coffeeUsesLeft);
 
   useEffect(() => {
-    if (!isRunning || phase !== "console") return;
+    setSfxMuted(muted);
+  }, [muted]);
+
+  useEffect(() => {
+    if (!isRunning || isPaused || phase !== "console") return;
     const id = window.setInterval(() => tick(), TICK_MS);
     return () => window.clearInterval(id);
-  }, [isRunning, phase, tick]);
+  }, [isRunning, isPaused, phase, tick]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "p" || e.key === "P") togglePause();
+      if (e.key === "m" || e.key === "M") toggleMute();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [togglePause, toggleMute]);
 
   if (phase === "idle") {
     return (
@@ -72,6 +99,9 @@ export function GameShell() {
             Bathroom luck, lunch stealth, typing outages, and one terrible idea
             involving a cigarette.
           </p>
+          <p className="mt-3 font-mono text-[10px] text-slate-500">
+            In-shift: P pause · M mute
+          </p>
         </motion.div>
         <motion.button
           type="button"
@@ -88,16 +118,15 @@ export function GameShell() {
     );
   }
 
+  const consoleMode = phase === "console" && !isBathroomTime;
+
   return (
     <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-[#0d1520] text-slate-100">
       <Hud />
       <div className="flex min-h-0 flex-1 flex-col gap-2 p-2 md:gap-3 md:p-3 lg:flex-row">
-        {/* Stage — office / mini-games (gives console room on short screens) */}
         <div
           className={`relative min-h-0 min-w-0 overflow-hidden ${
-            phase === "console" && !isBathroomTime
-              ? "flex-[0.75] lg:flex-1"
-              : "flex-1"
+            consoleMode ? "flex-[0.75] lg:flex-1" : "flex-1"
           }`}
         >
           <OfficeBackground muted={phase !== "console" || isBathroomTime} />
@@ -116,24 +145,69 @@ export function GameShell() {
               <TypingOutage />
             </div>
           )}
+          {phase === "smoke" && (
+            <div className="absolute inset-0 z-20 overflow-hidden">
+              <SmokeBreakScene />
+            </div>
+          )}
+          {isPaused && phase === "console" && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60">
+              <div className="pixel-frame border-4 border-amber-400 bg-[#152033] p-6 text-center">
+                <p className="font-pixel text-lg text-amber-300 mb-2">Paused</p>
+                <p className="font-mono text-xs text-slate-400 mb-3">
+                  Press P to resume
+                </p>
+                <button
+                  type="button"
+                  className="pixel-btn bg-amber-400 text-[#1a2332]"
+                  onClick={() => togglePause()}
+                >
+                  Resume
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Console — sized so ticket + all answers fit without scrolling */}
         <aside
           className={`flex min-h-0 w-full flex-col gap-2 ${
-            phase === "console" && !isBathroomTime
+            consoleMode
               ? "flex-[1.25] lg:w-[min(420px,38vw)] lg:flex-none"
               : "flex-1 lg:w-[min(420px,38vw)] lg:flex-none"
           }`}
         >
-          <div className="flex shrink-0 items-center justify-between gap-2">
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
             <SmokeBreakButton />
-            <span className="hidden font-mono text-[10px] text-slate-500 sm:inline">
-              1 game min ≈ 1s
-            </span>
+            <button
+              type="button"
+              className="pixel-btn border-2 border-amber-800/60 bg-[#2a2418] px-2 py-2 font-pixel text-[9px] text-amber-100"
+              title="Coffee (+8 sanity, limited)"
+              disabled={!consoleMode || isPaused}
+              onClick={() => {
+                playCoffee();
+                drinkCoffee();
+              }}
+            >
+              Coffee ({coffeeUsesLeft})
+            </button>
+            <button
+              type="button"
+              className="pixel-btn border-2 border-slate-600 bg-[#1a2740] px-2 py-2 font-pixel text-[9px] text-slate-200"
+              onClick={() => togglePause()}
+              disabled={phase !== "console"}
+            >
+              {isPaused ? "Resume" : "Pause"}
+            </button>
+            <button
+              type="button"
+              className="pixel-btn border-2 border-slate-600 bg-[#1a2740] px-2 py-2 font-pixel text-[9px] text-slate-200"
+              onClick={() => toggleMute()}
+            >
+              {muted ? "Unmute" : "Mute"}
+            </button>
           </div>
           <div className="min-h-0 flex-1">
-            {phase === "console" && !isBathroomTime ? (
+            {consoleMode ? (
               <TicketPopup />
             ) : (
               <div className="pixel-frame h-full border-4 border-slate-700 bg-[#152033]/80 p-3 font-mono text-sm text-slate-400">
@@ -141,6 +215,7 @@ export function GameShell() {
                   "Ticket console locked — bathroom break."}
                 {phase === "lunch" && "Out to lunch (allegedly)."}
                 {phase === "outage" && "MAJOR OUTAGE — type to survive."}
+                {phase === "smoke" && "Stepped outside. Please hold."}
                 {(phase === "won" || phase === "lost") && "Shift ended."}
               </div>
             )}
@@ -154,7 +229,6 @@ export function GameShell() {
           tone={dialog.tone}
           onClose={() => {
             clearDialog();
-            // Dismissing bathroom result also returns to the desk
             if (phase === "bathroom") finishBathroom();
           }}
         />

@@ -1,0 +1,42 @@
+[
+  {
+    "ticketID": "TS-901",
+    "callerName": "Mute All Mike",
+    "problem": "I can't hear anyone on the bridge. Also nobody can hear me. Coincidence?",
+    "answers": [
+      { "text": "Check if you're muted. Then check if everyone else is muted.", "effect": { "sanity": -4, "csat": 10, "queue": -1 } },
+      { "text": "That's not a bug, that's a lifestyle.", "effect": { "sanity": 6, "csat": -14, "queue": 1 } },
+      { "text": "I'll send a calendar invite titled 'Unmute Yourself'.", "effect": { "sanity": 2, "csat": -8, "queue": 0 } }
+    ]
+  },
+  {
+    "ticketID": "TS-512",
+    "callerName": "VPN Veronica",
+    "problem": "Phone works at home, dies at the office. The building is haunted.",
+    "answers": [
+      { "text": "Likely Wi-Fi calling vs desk VLAN. Checking your profile.", "effect": { "sanity": -3, "csat": 11, "queue": -1 } },
+      { "text": "Agree. Burn sage near the IDF closet.", "effect": { "sanity": 8, "csat": -16, "queue": 2 } },
+      { "text": "Bring the ghost a headset. Union rules.", "effect": { "sanity": 5, "csat": -10, "queue": 1 } }
+    ]
+  },
+  {
+    "ticketID": "TS-303",
+    "callerName": "Echo Eddie",
+    "problem": "I hear myself twice. It's like karaoke but sadder.",
+    "answers": [
+      { "text": "Disable speakerphone and check for dual audio devices.", "effect": { "sanity": -3, "csat": 12, "queue": -1 } },
+      { "text": "Lean into the duet. Harmonize.", "effect": { "sanity": 7, "csat": -12, "queue": 1 } },
+      { "text": "That's just your conscience on a delay.", "effect": { "sanity": 4, "csat": -9, "queue": 0 } }
+    ]
+  },
+  {
+    "ticketID": "TS-118",
+    "callerName": "Busy Light Barb",
+    "problem": "My presence shows Available while I'm in a call. People keep walking up.",
+    "answers": [
+      { "text": "Forcing presence sync and checking the USB busy light.", "effect": { "sanity": -4, "csat": 10, "queue": -1 } },
+      { "text": "Put up a cardboard sign that says GO AWAY.", "effect": { "sanity": 6, "csat": -11, "queue": 1 } },
+      { "text": "Become Unavailable as a person.", "effect": { "sanity": 3, "csat": -7, "queue": 0 } }
+    ]
+  }
+]

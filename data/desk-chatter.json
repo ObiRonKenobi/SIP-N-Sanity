@@ -1,0 +1,34 @@
+{
+  "quips": {
+    "agent-a": [
+      "Have you tried turning it off and on again?",
+      "My queue has a queue.",
+      "Is 'jitter' a feeling or a metric?"
+    ],
+    "agent-b": [
+      "I'm on hold with hold music about hold music.",
+      "CSAT is a state of mind.",
+      "Someone plugged Ethernet into the wall wart again."
+    ],
+    "agent-c": [
+      "Escalating to someone who still has hope.",
+      "Packet loss? Emotionally, yes.",
+      "The softphone blinked. I blinked back."
+    ],
+    "santa": [
+      "He is a regular employee working off-season."
+    ],
+    "player": [
+      "One more ticket…",
+      "Coffee is a food group.",
+      "Please hold. Forever."
+    ]
+  },
+  "_pending": {
+    "note": "Replace clone agents with yarmulke-color IDs. Speech bubbles in Hebrew; SFX is recorded chchchchchchch. English quips above are placeholders.",
+    "cloneHebrewExamples": [
+      "אלה הבייגלים שלכם?!",
+      "You call these bagels?! (temp Latin until Hebrew copy final)"
+    ]
+  }
+}

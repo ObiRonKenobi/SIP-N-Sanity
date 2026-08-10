@@ -1,15 +1,21 @@
 "use client";
 
 import { useGameStore } from "@/store";
-import { playSmokeWin, playWitchYell } from "@/components/ui/sfx";
 
 export function SmokeBreakButton() {
   const hasSmoked = useGameStore((s) => s.hasSmoked);
   const phase = useGameStore((s) => s.currentPhase);
+  const isPaused = useGameStore((s) => s.isPaused);
   const takeSmokeBreak = useGameStore((s) => s.takeSmokeBreak);
 
   const locked =
-    hasSmoked || phase === "bathroom" || phase === "lunch" || phase === "idle";
+    hasSmoked ||
+    isPaused ||
+    phase === "bathroom" ||
+    phase === "lunch" ||
+    phase === "outage" ||
+    phase === "smoke" ||
+    phase === "idle";
 
   return (
     <button
@@ -20,12 +26,7 @@ export function SmokeBreakButton() {
           ? "Already used this shift"
           : "33% bliss / 67% Witch — once per day"
       }
-      onClick={() => {
-        takeSmokeBreak();
-        const rng = useGameStore.getState().smokeRNG;
-        if (rng < 0.33) playSmokeWin();
-        else playWitchYell();
-      }}
+      onClick={() => takeSmokeBreak()}
       className={`pixel-btn flex items-center gap-2 border-2 px-3 py-2 font-pixel text-[10px] ${
         locked
           ? "cursor-not-allowed border-slate-700 bg-slate-800 text-slate-500 opacity-60"

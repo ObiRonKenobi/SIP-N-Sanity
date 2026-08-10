@@ -1,4 +1,5 @@
 import ticketDb from "@/data/ticket-db.json";
+import ticketExtra from "@/data/ticket-db-extra.json";
 
 export type MeterEffect = {
   sanity: number;
@@ -18,7 +19,7 @@ export type Ticket = {
   answers: TicketAnswer[];
 };
 
-const tickets = ticketDb as Ticket[];
+const tickets = [...(ticketDb as Ticket[]), ...(ticketExtra as Ticket[])];
 
 export function pickRandomTicket(excludeId?: string): Ticket {
   const pool = excludeId

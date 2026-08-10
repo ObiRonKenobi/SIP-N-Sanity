@@ -1,6 +1,8 @@
 "use client";
 
 import { DeskWorker } from "./DeskWorker";
+import { SpriteImg } from "@/components/ui/SpriteImg";
+import { SPRITES } from "@/lib/sprites";
 
 const DUST = [
   { left: "12%", delay: "0s", bottom: "20%" },
@@ -10,19 +12,25 @@ const DUST = [
   { left: "88%", delay: "1.8s", bottom: "28%" },
 ];
 
-/** Top row (farther from camera): coworkers + Santa in a place. Bottom: you + front row. */
-const TOP_ROW: { variant: "agent" | "santa"; label?: string }[] = [
-  { variant: "agent" },
-  { variant: "santa" },
-  { variant: "agent" },
-  { variant: "agent" },
+const TOP_ROW: {
+  variant: "agent" | "santa";
+  chatterId?: string;
+  label?: string;
+}[] = [
+  { variant: "agent", chatterId: "agent-a" },
+  { variant: "santa", chatterId: "santa" },
+  { variant: "agent", chatterId: "agent-b" },
+  { variant: "agent", chatterId: "agent-c" },
 ];
 
-const BOTTOM_ROW: { variant: "agent" | "player" }[] = [
-  { variant: "agent" },
-  { variant: "player" },
-  { variant: "agent" },
-  { variant: "agent" },
+const BOTTOM_ROW: {
+  variant: "agent" | "player";
+  chatterId?: string;
+}[] = [
+  { variant: "agent", chatterId: "agent-a" },
+  { variant: "player", chatterId: "player" },
+  { variant: "agent", chatterId: "agent-b" },
+  { variant: "agent", chatterId: "agent-c" },
 ];
 
 export function OfficeBackground({ muted = false }: { muted?: boolean }) {
@@ -31,39 +39,42 @@ export function OfficeBackground({ muted = false }: { muted?: boolean }) {
       className={`office-scanlines relative h-full min-h-0 w-full overflow-hidden border-4 border-[#0b1220] transition-[filter,opacity] duration-500 ${
         muted ? "opacity-35 grayscale" : ""
       }`}
-      style={{
-        background: `
-          linear-gradient(180deg, #3a516e 0%, #243652 38%, #1a2740 70%, #121c2c 100%)
-        `,
-        imageRendering: "pixelated",
-      }}
+      style={{ imageRendering: "pixelated" }}
     >
-      {/* carpet */}
-      <div
-        className="absolute inset-0 opacity-40"
-        style={{
-          backgroundImage: `
-            repeating-linear-gradient(0deg, #1e3050 0 16px, #243a5c 16px 32px),
-            repeating-linear-gradient(90deg, transparent 0 31px, rgba(0,0,0,0.15) 31px 32px)
-          `,
-        }}
-      />
-
-      {/* windows */}
-      <div className="absolute left-4 top-3 z-[1] grid grid-cols-3 gap-2">
-        {[0, 1, 2].map((i) => (
+      <SpriteImg
+        src={SPRITES.officeIso}
+        alt="Office"
+        className="absolute inset-0 h-full w-full object-cover"
+        fallback={
           <div
-            key={i}
-            className="window-light h-14 w-14 border-4 border-[#4a6280] bg-gradient-to-b from-sky-200/50 via-amber-100/25 to-amber-900/10"
-            style={{ animationDelay: `${i * 0.8}s` }}
+            className="absolute inset-0"
+            style={{
+              background: `
+                linear-gradient(180deg, #3a516e 0%, #243652 38%, #1a2740 70%, #121c2c 100%)
+              `,
+            }}
           >
-            <div className="absolute inset-x-0 top-1/2 h-0.5 bg-[#4a6280]/80" />
-            <div className="absolute inset-y-0 left-1/2 w-0.5 bg-[#4a6280]/80" />
+            <div
+              className="absolute inset-0 opacity-40"
+              style={{
+                backgroundImage: `
+                  repeating-linear-gradient(0deg, #1e3050 0 16px, #243a5c 16px 32px),
+                  repeating-linear-gradient(90deg, transparent 0 31px, rgba(0,0,0,0.15) 31px 32px)
+                `,
+              }}
+            />
+            <div className="absolute left-4 top-3 z-[1] grid grid-cols-3 gap-2">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="window-light h-14 w-14 border-4 border-[#4a6280] bg-gradient-to-b from-sky-200/50 via-amber-100/25 to-amber-900/10"
+                />
+              ))}
+            </div>
+            <div className="absolute left-0 right-0 top-[76px] z-[1] h-2 bg-[#5c4030]" />
           </div>
-        ))}
-      </div>
-
-      <div className="absolute left-0 right-0 top-[76px] z-[1] h-2 bg-[#5c4030]" />
+        }
+      />
 
       {!muted &&
         DUST.map((d, i) => (
@@ -74,7 +85,6 @@ export function OfficeBackground({ muted = false }: { muted?: boolean }) {
           />
         ))}
 
-      {/* two desk rows — Santa sits in the back (top) row */}
       <div className="absolute inset-x-2 bottom-[6%] top-[22%] z-[3] flex flex-col justify-end gap-[4%]">
         <div className="flex max-h-[46%] scale-[0.92] justify-around gap-1 opacity-95 origin-bottom">
           {TOP_ROW.map((seat, i) => (
@@ -83,6 +93,7 @@ export function OfficeBackground({ muted = false }: { muted?: boolean }) {
               index={i}
               active={!muted}
               variant={seat.variant}
+              chatterId={seat.chatterId}
               label={seat.label}
             />
           ))}
@@ -94,6 +105,7 @@ export function OfficeBackground({ muted = false }: { muted?: boolean }) {
               index={i + 4}
               active={!muted}
               variant={seat.variant}
+              chatterId={seat.chatterId}
             />
           ))}
         </div>
