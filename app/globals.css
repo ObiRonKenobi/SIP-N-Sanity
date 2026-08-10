@@ -189,6 +189,21 @@ body > div {
   animation: title-glitch 4s steps(1, end) infinite;
 }
 
+@keyframes demo-arrow-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+.anim-demo-arrow {
+  animation: demo-arrow-blink 0.55s steps(1, end) infinite;
+}
+
 .meter-fill {
   position: relative;
   overflow: hidden;
@@ -265,6 +280,7 @@ body > div {
   .anim-bob-delayed,
   .anim-ring,
   .anim-title-glitch,
+  .anim-demo-arrow,
   .meter-fill,
   .meter-fill::after,
   .meter-danger .meter-fill,

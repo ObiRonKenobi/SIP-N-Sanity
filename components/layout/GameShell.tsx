@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { useGameStore, TICK_MS } from "@/store";
 import { Hud } from "@/components/ui/Hud";
@@ -114,6 +115,12 @@ export function GameShell() {
         >
           Clock In
         </motion.button>
+        <Link
+          href="/demo"
+          className="relative z-10 pixel-btn border-2 border-sky-400/80 bg-sky-900/40 px-6 py-2 font-pixel text-[10px] text-sky-200 hover:bg-sky-800/60"
+        >
+          Play demo
+        </Link>
       </div>
     );
   }

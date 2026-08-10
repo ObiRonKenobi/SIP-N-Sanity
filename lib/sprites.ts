@@ -5,6 +5,7 @@
 
 export const SPRITES = {
   officeIso: "/sprites/maps/office-iso.png",
+  breakroomIso: "/sprites/maps/breakroom-iso.png",
   deskIso: "/sprites/furniture/desk-iso.png",
   deskIsoAlt: "/sprites/furniture/desk-iso-alt.png",
   deskRegular: "/sprites/furniture/desk-regular.png",

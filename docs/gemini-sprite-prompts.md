@@ -48,6 +48,19 @@ Lunch sneak uses this **same** isometric view (no separate top-down room). Cowor
 
 ~~### 1b. Top-down office map~~ **CANCELLED** — stealth no longer needs a top-down room. Do not generate `office-topdown.png`.
 
+### 1c. Break room map (DONE — `maps/breakroom-iso.png`)
+
+**Attach:** `maps/office-iso.png`. Smaller room, same isometric angle. Furniture baked in.
+
+> Use the attached Livetel office map as the camera/style reference. Draw a SMALLER isometric ¾ cutaway break room in that SAME angle and pixel scale (same diamond foreshortening — do not invent a new tilt). Grimier cute SNES office comedy, muted dirty teal/beige walls, stained carpet, fluorescent light, transparent outside the room silhouette.
+>
+> Layout as you enter from the office doorway (doorway on the near/bottom or bottom-right edge so it connects to the office map’s breakroom door):
+> - LEFT of the room: a tall refrigerator
+> - Next to the fridge (along the left/back wall): a SHORT counter with a sink; TWO cabinets above the counter and TWO cabinets below
+> - RIGHT of the room: a small break table with exactly TWO chairs
+>
+> Rules: EMPTY of people; furniture baked into this map; no desks/UI/text; crisp pixels; cozy closet-sized break area.
+
 ### 1b. Livetel wall logo (standalone, reusable)
 
 **File:** `ui/livetel-logo.png` · **Size:** 128×48 (and optional `ui/livetel-logo-sm.png` 64×24)

@@ -1,0 +1,15 @@
+{
+  "playerStart": { "x": 42, "y": 72 },
+  "playerSpeed": 1.15,
+  "hintDelayMs": 30000,
+  "breakroom": { "x": 78, "y": 38, "w": 16, "h": 22 },
+  "hintArrow": { "x": 72, "y": 52 },
+  "desks": [
+    { "id": "hero", "sprite": "deskHero", "x": 42, "y": 70, "w": 12, "h": 14 },
+    { "id": "santa", "sprite": "deskSanta", "x": 28, "y": 52, "w": 12, "h": 14 },
+    { "id": "regular-a", "sprite": "deskRegular", "x": 56, "y": 48, "w": 12, "h": 14 },
+    { "id": "regular-b", "sprite": "deskRegular", "x": 34, "y": 66, "w": 12, "h": 14 },
+    { "id": "regular-c", "sprite": "deskRegular", "x": 62, "y": 66, "w": 12, "h": 14 },
+    { "id": "manager", "sprite": "deskManager", "x": 48, "y": 36, "w": 13, "h": 15 }
+  ]
+}
