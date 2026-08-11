@@ -1424,23 +1424,43 @@ export function DemoWalk() {
             </div>
           </div>
         ) : (
-          <div className="z-20 shrink-0 border-t-2 border-[#0b1220] bg-[#152033]/95 px-4 py-5 backdrop-blur-sm sm:px-6 sm:py-6">
-            <h2 className="mb-3 font-pixel text-base text-amber-300 sm:text-lg">
-              SIP-N-Sanity — Demo complete
-            </h2>
-            <p className="mb-4 max-w-3xl font-mono text-sm leading-relaxed text-slate-200 sm:text-base sm:leading-7">
-              You survived long enough to find the break room. The full game is
-              a 9-to-5 VoIP support shift: balance Sanity, CSAT, and the ticket
-              queue, dodge bathroom luck, lunch sneak, typing outages, the
-              Office Witch, and one coworker who is definitely Santa (nobody
-              mentions it). More desks, clones, and chaos coming soon.
-            </p>
-            <Link
-              href="/"
-              className="pixel-btn inline-block bg-amber-400 px-5 py-2.5 font-pixel text-xs text-[#1a2332] hover:bg-amber-300 sm:text-[11px]"
-            >
-              Back to title
-            </Link>
+          <div className="z-20 shrink-0 border-t-2 border-[#0b1220] bg-[#152033]/95 px-4 py-5 pr-16 backdrop-blur-sm sm:px-6 sm:py-6 sm:pr-20">
+            <div className="grid gap-6 sm:grid-cols-2 sm:items-center sm:gap-8">
+              <div>
+                <h2 className="mb-3 font-pixel text-base text-amber-300 sm:text-lg">
+                  SIP-N-Sanity — Demo complete
+                </h2>
+                <p className="mb-4 max-w-3xl font-mono text-sm leading-relaxed text-slate-200 sm:text-base sm:leading-7">
+                  You survived long enough to find the break room. The full game
+                  is a 9-to-5 VoIP support shift: balance Sanity, CSAT, and the
+                  ticket queue, dodge bathroom luck, lunch sneak, typing
+                  outages, the Office Witch, and one coworker who is definitely
+                  Santa (nobody mentions it). More desks, clones, and chaos
+                  coming soon.
+                </p>
+                <Link
+                  href="/"
+                  className="pixel-btn inline-block bg-amber-400 px-5 py-2.5 font-pixel text-xs text-[#1a2332] hover:bg-amber-300 sm:text-[11px]"
+                >
+                  Back to title
+                </Link>
+              </div>
+              <div className="flex min-h-[8.5rem] items-center justify-center px-2 text-center">
+                <p className="font-pixel text-[11px] leading-[1.7] text-amber-100 sm:text-sm sm:leading-7">
+                  SIP-N-Sanity
+                  <br />
+                  <span className="text-slate-400">is</span>
+                  <br />
+                  an rbyt3r production
+                  <br />
+                  <span className="text-slate-400">with</span>
+                  <br />
+                  music by Caligula
+                  <br />
+                  <span className="text-amber-300">MMXXVI</span>
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
