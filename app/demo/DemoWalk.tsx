@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { SpriteImg } from "@/components/ui/SpriteImg";
 import { AudioSettings } from "@/components/ui/AudioSettings";
+import { startDemoMusic } from "@/components/ui/demoMusic";
 import { SPRITES } from "@/lib/sprites";
 import { LAYOUT_DEBUG } from "@/lib/layoutDebug";
 import demoLayout from "@/data/demo-layout.json";
@@ -502,6 +503,10 @@ export function DemoWalk() {
 
   useEffect(() => {
     if (LAYOUT_DEBUG) clearDraft();
+  }, []);
+
+  useEffect(() => {
+    startDemoMusic();
   }, []);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 /**
  * Demo BGM — starts on "Play demo" (user gesture), survives /demo navigation,
- * plays once through office + break room, then silence (no loop).
+ * loops until Music is turned off. Unused original: /music/od-yishama.mp3
  * Respects audio prefs (music on/off + master volume).
  */
 
@@ -10,7 +10,7 @@ import {
   subscribeAudioPrefs,
 } from "@/lib/audioPrefs";
 
-const DEMO_MUSIC_SRC = "/music/od-yishama.mp3";
+const DEMO_MUSIC_SRC = "/music/livefone-theme.wav";
 /** Base gain before master volume (kept under 1 so 100% isn't harsh). */
 const BASE_GAIN = 0.72;
 
@@ -56,12 +56,9 @@ function getTrack(): HTMLAudioElement | null {
   ensureSubscribed();
   if (!track) {
     track = new Audio(DEMO_MUSIC_SRC);
-    track.loop = false;
+    track.loop = true;
     track.preload = "auto";
     track.volume = effectiveVolume();
-    track.addEventListener("ended", () => {
-      started = false;
-    });
   }
   return track;
 }
@@ -84,7 +81,6 @@ export function startDemoMusic() {
   if (started && !audio.paused && !audio.ended) return;
   started = true;
   if (audio.ended) audio.currentTime = 0;
-  if (audio.currentTime === 0 || audio.ended) audio.currentTime = 0;
   void audio.play().catch(() => {
     started = false;
   });
