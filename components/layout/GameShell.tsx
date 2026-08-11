@@ -12,6 +12,7 @@ import { EndScreen } from "@/components/ui/EndScreen";
 import { OfficeBackground } from "@/components/office/OfficeBackground";
 import { setSfxMuted, playCoffee } from "@/components/ui/sfx";
 import { startDemoMusic, setDemoMusicMuted } from "@/components/ui/demoMusic";
+import { AudioSettings } from "@/components/ui/AudioSettings";
 import dynamic from "next/dynamic";
 
 const BathroomGamble = dynamic(
@@ -80,6 +81,7 @@ export function GameShell() {
   if (phase === "idle") {
     return (
       <div className="relative flex h-[100dvh] w-full flex-col items-center justify-center gap-6 overflow-x-hidden overflow-y-hidden bg-[#0d1520] p-6">
+        <AudioSettings />
         <div
           className="pointer-events-none absolute inset-0"
           style={{

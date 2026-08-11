@@ -70,6 +70,34 @@ body > div {
   box-shadow: none;
 }
 
+/* Audio settings — CRT / pixel range thumb */
+.audio-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border: 2px solid #0b1220;
+  background: #0a1018;
+  outline: none;
+  cursor: pointer;
+}
+.audio-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #0b1220;
+  background: #fbbf24;
+  cursor: pointer;
+}
+.audio-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #0b1220;
+  background: #fbbf24;
+  border-radius: 0;
+  cursor: pointer;
+}
+
 /* ---- Placeholder animation kit (swap sprites later) ---- */
 
 @keyframes crt-flicker {

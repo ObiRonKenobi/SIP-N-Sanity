@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { SpriteImg } from "@/components/ui/SpriteImg";
+import { AudioSettings } from "@/components/ui/AudioSettings";
 import { SPRITES } from "@/lib/sprites";
 import { LAYOUT_DEBUG } from "@/lib/layoutDebug";
 import demoLayout from "@/data/demo-layout.json";
@@ -112,7 +113,6 @@ function isBehindDesk(
   const xs = poly.map((p) => p.x);
   const ys = poly.map((p) => p.y);
   const frontTipY = Math.max(...ys);
-  const minY = Math.min(...ys);
   const minX = Math.min(...xs);
   const maxX = Math.max(...xs);
 
@@ -235,8 +235,6 @@ const INITIAL_FOOTPRINT: Pos[] = (
 const INITIAL_FLOOR: Pos[] = (
   (demoLayout as { floorPoly?: Pos[] }).floorPoly ?? []
 ).map((p) => ({ ...p }));
-
-const INITIAL_DOOR: Rect = { ...demoLayout.breakroom };
 
 function inflatePoly(poly: Pos[], pad: number): Pos[] {
   const c = polyCentroid(poly);
@@ -412,10 +410,8 @@ export function DemoWalk() {
   const [footAnchorPct, setFootAnchorPct] = useState(
     layoutExtras.footAnchorPct ?? 100,
   );
-  const [deskSortBias, setDeskSortBias] = useState(
-    layoutExtras.deskSortBias ?? 0,
-  );
-  const [hintArrow, setHintArrow] = useState<Pos>({
+  const [deskSortBias] = useState(layoutExtras.deskSortBias ?? 0);
+  const [hintArrow] = useState<Pos>({
     x: demoLayout.hintArrow.x,
     y: demoLayout.hintArrow.y,
   });
@@ -1325,6 +1321,7 @@ export function DemoWalk() {
   if (scene === "breakroom") {
     return (
       <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#0d1520]">
+        <AudioSettings />
         <div
           ref={viewportRef}
           className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden"
@@ -1422,11 +1419,11 @@ export function DemoWalk() {
             </div>
           </div>
         ) : (
-          <div className="z-20 shrink-0 border-t-2 border-[#0b1220] bg-[#152033]/95 px-4 py-4 backdrop-blur-sm">
-            <h2 className="mb-2 font-pixel text-sm text-amber-300">
+          <div className="z-20 shrink-0 border-t-2 border-[#0b1220] bg-[#152033]/95 px-4 py-5 backdrop-blur-sm sm:px-6 sm:py-6">
+            <h2 className="mb-3 font-pixel text-base text-amber-300 sm:text-lg">
               SIP-N-Sanity — Demo complete
             </h2>
-            <p className="mb-3 max-w-2xl font-mono text-xs leading-relaxed text-slate-300">
+            <p className="mb-4 max-w-3xl font-mono text-sm leading-relaxed text-slate-200 sm:text-base sm:leading-7">
               You survived long enough to find the break room. The full game is
               a 9-to-5 VoIP support shift: balance Sanity, CSAT, and the ticket
               queue, dodge bathroom luck, lunch sneak, typing outages, the
@@ -1435,7 +1432,7 @@ export function DemoWalk() {
             </p>
             <Link
               href="/"
-              className="pixel-btn inline-block bg-amber-400 px-5 py-2 font-pixel text-[10px] text-[#1a2332] hover:bg-amber-300"
+              className="pixel-btn inline-block bg-amber-400 px-5 py-2.5 font-pixel text-xs text-[#1a2332] hover:bg-amber-300 sm:text-[11px]"
             >
               Back to title
             </Link>
@@ -1458,6 +1455,7 @@ export function DemoWalk() {
 
   return (
     <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#121c2c]">
+      <AudioSettings />
       <div
         ref={viewportRef}
         className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-[#0a1018]"

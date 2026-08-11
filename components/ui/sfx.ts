@@ -1,14 +1,41 @@
-/** Web Audio placeholders; respects store mute. Real WAVs: drop in public/sounds/ later. */
+/** Web Audio placeholders; respects audio prefs (SFX + master volume). */
+
+import {
+  getAudioPrefs,
+  hydrateAudioPrefs,
+  subscribeAudioPrefs,
+} from "@/lib/audioPrefs";
 
 let ctx: AudioContext | null = null;
-let muted = false;
+let subscribed = false;
+/** Legacy game-store mute (OR'd with prefs.sfx). */
+let storeMuted = false;
+
+function ensureSubscribed() {
+  if (subscribed || typeof window === "undefined") return;
+  subscribed = true;
+  hydrateAudioPrefs();
+  subscribeAudioPrefs(() => {
+    /* prefs read live in play paths */
+  });
+}
+
+function sfxAllowed(): boolean {
+  ensureSubscribed();
+  const { sfx, volume } = getAudioPrefs();
+  return !storeMuted && sfx && volume > 0.001;
+}
+
+function masterGain(): number {
+  return getAudioPrefs().volume;
+}
 
 export function setSfxMuted(value: boolean) {
-  muted = value;
+  storeMuted = value;
 }
 
 function ac(): AudioContext | null {
-  if (typeof window === "undefined" || muted) return null;
+  if (typeof window === "undefined" || !sfxAllowed()) return null;
   if (!ctx) ctx = new AudioContext();
   return ctx;
 }
@@ -17,16 +44,16 @@ function beep(
   freq: number,
   duration: number,
   type: OscillatorType = "square",
-  gain = 0.04
+  gain = 0.04,
 ) {
-  if (muted) return;
+  if (!sfxAllowed()) return;
   const audio = ac();
   if (!audio) return;
   const osc = audio.createOscillator();
   const g = audio.createGain();
   osc.type = type;
   osc.frequency.value = freq;
-  g.gain.value = gain;
+  g.gain.value = gain * masterGain();
   osc.connect(g);
   g.connect(audio.destination);
   const t = audio.currentTime;
@@ -37,12 +64,13 @@ function beep(
 
 /** Try HTMLAudioElement from /sounds/{name}.wav|mp3, else beep fallback. */
 function playFile(name: string, fallback: () => void) {
-  if (muted || typeof window === "undefined") return;
+  if (!sfxAllowed() || typeof window === "undefined") return;
+  const vol = 0.35 * masterGain();
   const a = new Audio(`/sounds/${name}.wav`);
-  a.volume = 0.35;
+  a.volume = vol;
   a.play().catch(() => {
     const b = new Audio(`/sounds/${name}.mp3`);
-    b.volume = 0.35;
+    b.volume = vol;
     b.play().catch(() => fallback());
   });
 }
