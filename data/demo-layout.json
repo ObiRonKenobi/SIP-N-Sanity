@@ -1,15 +1,111 @@
 {
-  "playerStart": { "x": 42, "y": 72 },
-  "playerSpeed": 1.15,
+  "playerStart": {
+    "x": 32.59,
+    "y": 78.19
+  },
+  "playerSpeed": 18,
   "hintDelayMs": 30000,
-  "breakroom": { "x": 78, "y": 38, "w": 16, "h": 22 },
-  "hintArrow": { "x": 72, "y": 52 },
+  "bounds": {
+    "minX": 3,
+    "maxX": 98,
+    "minY": 34,
+    "maxY": 101
+  },
+  "floorPoly": [
+    {
+      "x": 21.2,
+      "y": 57.01
+    },
+    {
+      "x": 36.5,
+      "y": 45.21
+    },
+    {
+      "x": 49.9,
+      "y": 35.61
+    },
+    {
+      "x": 82.82,
+      "y": 62.81
+    },
+    {
+      "x": 85.15,
+      "y": 59.73
+    },
+    {
+      "x": 95.08,
+      "y": 65.78
+    },
+    {
+      "x": 83.75,
+      "y": 72.48
+    },
+    {
+      "x": 70.82,
+      "y": 82.27
+    },
+    {
+      "x": 42.58,
+      "y": 100.22
+    },
+    {
+      "x": 21.82,
+      "y": 83.73
+    },
+    {
+      "x": 9.64,
+      "y": 70.48
+    },
+    {
+      "x": 4.2,
+      "y": 66.81
+    }
+  ],
+  "breakroom": {
+    "x": 85.87,
+    "y": 29.73,
+    "w": 7.7,
+    "h": 38.98
+  },
+  "hintArrow": {
+    "x": 89.7,
+    "y": 49.5
+  },
+  "playerHeightPct": 23.5,
+  "footAnchorPct": 100,
+  "deskSortBias": 0,
+  "breakroomPlayer": {
+    "x": 52,
+    "y": 68,
+    "heightPct": 44
+  },
+  "playerRadius": 1.25,
   "desks": [
-    { "id": "hero", "sprite": "deskHero", "x": 42, "y": 70, "w": 12, "h": 14 },
-    { "id": "santa", "sprite": "deskSanta", "x": 28, "y": 52, "w": 12, "h": 14 },
-    { "id": "regular-a", "sprite": "deskRegular", "x": 56, "y": 48, "w": 12, "h": 14 },
-    { "id": "regular-b", "sprite": "deskRegular", "x": 34, "y": 66, "w": 12, "h": 14 },
-    { "id": "regular-c", "sprite": "deskRegular", "x": 62, "y": 66, "w": 12, "h": 14 },
-    { "id": "manager", "sprite": "deskManager", "x": 48, "y": 36, "w": 13, "h": 15 }
+    {
+      "id": "manager",
+      "sprite": "deskManager",
+      "x": 49.53,
+      "y": 51.36,
+      "w": 26,
+      "h": 32,
+      "footprintPoly": [
+        {
+          "x": 51.38,
+          "y": 44.72
+        },
+        {
+          "x": 58.54,
+          "y": 53.01
+        },
+        {
+          "x": 52.37,
+          "y": 57.67
+        },
+        {
+          "x": 43.88,
+          "y": 49.32
+        }
+      ]
+    }
   ]
 }
