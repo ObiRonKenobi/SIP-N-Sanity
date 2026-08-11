@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useGameStore, TICK_MS } from "@/store";
 import { Hud } from "@/components/ui/Hud";
@@ -11,6 +11,7 @@ import { DialogBox } from "@/components/ui/DialogBox";
 import { EndScreen } from "@/components/ui/EndScreen";
 import { OfficeBackground } from "@/components/office/OfficeBackground";
 import { setSfxMuted, playCoffee } from "@/components/ui/sfx";
+import { startDemoMusic, setDemoMusicMuted } from "@/components/ui/demoMusic";
 import dynamic from "next/dynamic";
 
 const BathroomGamble = dynamic(
@@ -41,12 +42,12 @@ const SmokeBreakScene = dynamic(
 );
 
 export function GameShell() {
+  const router = useRouter();
   const phase = useGameStore((s) => s.currentPhase);
   const tick = useGameStore((s) => s.tick);
   const isRunning = useGameStore((s) => s.isRunning);
   const isPaused = useGameStore((s) => s.isPaused);
   const muted = useGameStore((s) => s.muted);
-  const startDay = useGameStore((s) => s.startDay);
   const dialog = useGameStore((s) => s.dialog);
   const clearDialog = useGameStore((s) => s.clearDialog);
   const finishBathroom = useGameStore((s) => s.finishBathroom);
@@ -58,6 +59,7 @@ export function GameShell() {
 
   useEffect(() => {
     setSfxMuted(muted);
+    setDemoMusicMuted(muted);
   }, [muted]);
 
   useEffect(() => {
@@ -77,19 +79,25 @@ export function GameShell() {
 
   if (phase === "idle") {
     return (
-      <div className="relative flex h-[100dvh] w-full flex-col items-center justify-center gap-6 overflow-hidden bg-[radial-gradient(ellipse_at_top,#2a3d55,#0d1520)] p-6">
-        <div className="office-scanlines pointer-events-none absolute inset-0 opacity-40" />
+      <div className="relative flex h-[100dvh] w-full flex-col items-center justify-center gap-6 overflow-x-hidden overflow-y-hidden bg-[#0d1520] p-6">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse at top, #2a3d55 0%, #0d1520 70%)",
+          }}
+        />
         <motion.div
           className="relative z-10 text-center"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="anim-title-glitch font-pixel text-3xl text-amber-300 mb-2">
+          <h1 className="anim-title-glitch mb-2 font-pixel text-3xl text-amber-300">
             SIP-N-Sanity
           </h1>
           <motion.p
-            className="font-mono text-lg text-sky-300 mb-4"
+            className="mb-4 font-mono text-lg text-sky-300"
             animate={{ opacity: [0.7, 1, 0.7] }}
             transition={{ repeat: Infinity, duration: 2.4 }}
           >
@@ -104,23 +112,31 @@ export function GameShell() {
             In-shift: P pause · M mute
           </p>
         </motion.div>
-        <motion.button
-          type="button"
-          className="relative z-10 pixel-btn bg-amber-400 px-8 py-3 font-pixel text-sm text-[#1a2332] hover:bg-amber-300"
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.97 }}
-          animate={{ y: [0, -3, 0] }}
-          transition={{ y: { repeat: Infinity, duration: 1.8 } }}
-          onClick={() => startDay()}
-        >
-          Clock In
-        </motion.button>
-        <Link
-          href="/demo"
-          className="relative z-10 pixel-btn border-2 border-sky-400/80 bg-sky-900/40 px-6 py-2 font-pixel text-[10px] text-sky-200 hover:bg-sky-800/60"
-        >
-          Play demo
-        </Link>
+        <div className="relative z-10 flex flex-col items-center gap-3">
+          <button
+            type="button"
+            disabled
+            title="Full shift coming soon"
+            aria-disabled="true"
+            className="pixel-btn cursor-not-allowed bg-slate-600 px-8 py-3 font-pixel text-sm text-slate-400 opacity-60"
+          >
+            Clock In
+          </button>
+          <p className="font-mono text-[9px] text-slate-500">
+            Full shift — coming soon
+          </p>
+          <button
+            type="button"
+            className="pixel-btn bg-amber-400 px-8 py-3 font-pixel text-sm text-[#1a2332] hover:bg-amber-300"
+            style={{ transition: "background-color 80ms ease" }}
+            onClick={() => {
+              startDemoMusic();
+              router.push("/demo");
+            }}
+          >
+            Play demo
+          </button>
+        </div>
       </div>
     );
   }

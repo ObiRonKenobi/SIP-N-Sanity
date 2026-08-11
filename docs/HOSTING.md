@@ -31,6 +31,24 @@ docker run --rm -p 3000:3000 sip-n-sanity
 4. TLS via your existing cert automation  
 5. Drop Gemini PNGs into `public/sprites/` **before** build so they are baked into the image (or mount a volume)
 
+## Demo-only deploy (recommended for first rbyt3r.com ship)
+
+The public pitch right now is the **walk demo**, not the unfinished full shift.
+
+| Route | What it is |
+| --- | --- |
+| `/` | Title screen — **Play demo** is the live CTA; **Clock In** is disabled |
+| `/demo` | Office walk → break room → short pitch + BGM |
+
+**Ship the whole Next image** (Docker as above). Do **not** strip the full game code — production already hides layout debug (`LAYOUT_DEBUG` is `NODE_ENV === "development"` only) and the title does not start the unfinished shift.
+
+Optional polish in the deploy workspace:
+- Proxy `https://sip.rbyt3r.com/` → container `:3000` (title) or send `/` → `/demo` if you want zero title friction
+- Confirm `/music/od-yishama.mp3` is in the image (`public/music/`)
+- Smoke-test: title → Play demo → walk to door → break room → music ends once
+
+Do **not** rely on `PUT /api/dev/demo-layout` in production — it is a local layout editor only.
+
 ## Notes
 
 - App is a static-friendly client game; no database required  

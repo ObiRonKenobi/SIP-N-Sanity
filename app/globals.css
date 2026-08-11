@@ -143,15 +143,13 @@ body > div {
   0%,
   90%,
   100% {
-    transform: translate(0, 0);
     text-shadow: none;
   }
   92% {
-    transform: translate(-2px, 1px);
     text-shadow: 2px 0 #5eb1ff, -2px 0 #e85d4c;
   }
   94% {
-    transform: translate(2px, -1px);
+    text-shadow: -2px 0 #5eb1ff, 2px 0 #e85d4c;
   }
 }
 
@@ -229,6 +227,10 @@ body > div {
   animation: crt-flicker 0.6s steps(2, end) infinite;
 }
 
+.office-scanlines {
+  isolation: isolate;
+}
+
 .office-scanlines::before {
   content: "";
   pointer-events: none;
@@ -243,8 +245,9 @@ body > div {
     rgba(0, 0, 0, 0.12) 4px
   );
   animation: scanlines 0.35s linear infinite;
-  mix-blend-mode: multiply;
-  opacity: 0.35;
+  /* Avoid multiply — it can paint solid black bands when a sibling
+     (e.g. .pixel-btn hover) creates a new compositor layer. */
+  opacity: 0.45;
 }
 
 .dust-mote {
