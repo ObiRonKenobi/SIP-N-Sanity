@@ -1,0 +1,60 @@
+{
+  "employeeFacing": {
+    "id": "employeeFacing",
+    "label": "Employee desk (regular / hero / santa)",
+    "defaultW": 26,
+    "defaultH": 32,
+    "anchorY": 0.7,
+    "sprites": [
+      "deskRegular",
+      "deskHero",
+      "deskSanta"
+    ],
+    "relativeFootprintPoly": [
+      {
+        "x": 0.3915,
+        "y": 0.5628
+      },
+      {
+        "x": 0.7198,
+        "y": 0.8154
+      },
+      {
+        "x": 0.5744,
+        "y": 0.918
+      },
+      {
+        "x": 0.2461,
+        "y": 0.6654
+      }
+    ]
+  },
+  "managerFacing": {
+    "id": "managerFacing",
+    "label": "Manager / witch desk",
+    "defaultW": 26,
+    "defaultH": 32,
+    "anchorY": 0.7,
+    "sprites": [
+      "deskManager"
+    ],
+    "relativeFootprintPoly": [
+      {
+        "x": 0.3915,
+        "y": 0.5628
+      },
+      {
+        "x": 0.7198,
+        "y": 0.8154
+      },
+      {
+        "x": 0.5744,
+        "y": 0.918
+      },
+      {
+        "x": 0.2461,
+        "y": 0.6654
+      }
+    ]
+  }
+}

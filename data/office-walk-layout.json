@@ -1,0 +1,258 @@
+{
+  "playerStart": {
+    "x": 41.18,
+    "y": 74.21
+  },
+  "playerSpeed": 18,
+  "bounds": {
+    "minX": 3,
+    "maxX": 98,
+    "minY": 34,
+    "maxY": 101
+  },
+  "floorPoly": [
+    {
+      "x": 20.57,
+      "y": 56.53
+    },
+    {
+      "x": 34.68,
+      "y": 46.21
+    },
+    {
+      "x": 48.61,
+      "y": 35.87
+    },
+    {
+      "x": 82.9,
+      "y": 64.47
+    },
+    {
+      "x": 87.47,
+      "y": 61.63
+    },
+    {
+      "x": 95.19,
+      "y": 66.12
+    },
+    {
+      "x": 84.04,
+      "y": 73.48
+    },
+    {
+      "x": 70.93,
+      "y": 82.61
+    },
+    {
+      "x": 42.69,
+      "y": 100.56
+    },
+    {
+      "x": 22.51,
+      "y": 83.99
+    },
+    {
+      "x": 9.8,
+      "y": 72.47
+    },
+    {
+      "x": 4.31,
+      "y": 67.15
+    }
+  ],
+  "playerHeightPct": 23.5,
+  "footAnchorPct": 100,
+  "deskSortBias": 0,
+  "playerRadius": 1.25,
+  "desks": [
+    {
+      "id": "emp-regular",
+      "sprite": "deskRegular",
+      "archetype": "employeeFacing",
+      "x": 20.35,
+      "y": 69.76,
+      "w": 26,
+      "h": 32,
+      "relativeFootprintPoly": [
+        {
+          "x": 0.3915,
+          "y": 0.5628
+        },
+        {
+          "x": 0.7198,
+          "y": 0.8154
+        },
+        {
+          "x": 0.5744,
+          "y": 0.918
+        },
+        {
+          "x": 0.2461,
+          "y": 0.6654
+        }
+      ]
+    },
+    {
+      "id": "emp-regular-2",
+      "sprite": "deskRegular",
+      "archetype": "employeeFacing",
+      "x": 43.13,
+      "y": 54.14,
+      "w": 26,
+      "h": 32,
+      "relativeFootprintPoly": [
+        {
+          "x": 0.3915,
+          "y": 0.5628
+        },
+        {
+          "x": 0.7198,
+          "y": 0.8154
+        },
+        {
+          "x": 0.5744,
+          "y": 0.918
+        },
+        {
+          "x": 0.2461,
+          "y": 0.6654
+        }
+      ]
+    },
+    {
+      "id": "emp-regular-3",
+      "sprite": "deskRegular",
+      "archetype": "employeeFacing",
+      "x": 64.86,
+      "y": 71.68,
+      "w": 26,
+      "h": 32,
+      "relativeFootprintPoly": [
+        {
+          "x": 0.3915,
+          "y": 0.5628
+        },
+        {
+          "x": 0.7198,
+          "y": 0.8154
+        },
+        {
+          "x": 0.5744,
+          "y": 0.918
+        },
+        {
+          "x": 0.2461,
+          "y": 0.6654
+        }
+      ]
+    },
+    {
+      "id": "emp-regular-4",
+      "sprite": "deskRegular",
+      "archetype": "employeeFacing",
+      "x": 40.59,
+      "y": 88.27,
+      "w": 26,
+      "h": 32,
+      "relativeFootprintPoly": [
+        {
+          "x": 0.3915,
+          "y": 0.5628
+        },
+        {
+          "x": 0.7198,
+          "y": 0.8154
+        },
+        {
+          "x": 0.5744,
+          "y": 0.918
+        },
+        {
+          "x": 0.2461,
+          "y": 0.6654
+        }
+      ]
+    },
+    {
+      "id": "emp-hero",
+      "sprite": "deskHero",
+      "archetype": "employeeFacing",
+      "x": 53.29,
+      "y": 79.75,
+      "w": 26,
+      "h": 32,
+      "relativeFootprintPoly": [
+        {
+          "x": 0.3915,
+          "y": 0.5628
+        },
+        {
+          "x": 0.7198,
+          "y": 0.8154
+        },
+        {
+          "x": 0.5744,
+          "y": 0.918
+        },
+        {
+          "x": 0.2461,
+          "y": 0.6654
+        }
+      ]
+    },
+    {
+      "id": "emp-santa",
+      "sprite": "deskSanta",
+      "archetype": "employeeFacing",
+      "x": 32.32,
+      "y": 61.75,
+      "w": 26,
+      "h": 32,
+      "relativeFootprintPoly": [
+        {
+          "x": 0.3915,
+          "y": 0.5628
+        },
+        {
+          "x": 0.7198,
+          "y": 0.8154
+        },
+        {
+          "x": 0.5744,
+          "y": 0.918
+        },
+        {
+          "x": 0.2461,
+          "y": 0.6654
+        }
+      ]
+    },
+    {
+      "id": "manager",
+      "sprite": "deskManager",
+      "archetype": "managerFacing",
+      "x": 56.85,
+      "y": 48.53,
+      "w": 26,
+      "h": 32,
+      "relativeFootprintPoly": [
+        {
+          "x": 0.3915,
+          "y": 0.5628
+        },
+        {
+          "x": 0.7198,
+          "y": 0.8154
+        },
+        {
+          "x": 0.5744,
+          "y": 0.918
+        },
+        {
+          "x": 0.2461,
+          "y": 0.6654
+        }
+      ]
+    }
+  ]
+}

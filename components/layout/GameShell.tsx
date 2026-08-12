@@ -117,15 +117,17 @@ export function GameShell() {
         <div className="relative z-10 flex flex-col items-center gap-3">
           <button
             type="button"
-            disabled
-            title="Full shift coming soon"
-            aria-disabled="true"
-            className="pixel-btn cursor-not-allowed bg-slate-600 px-8 py-3 font-pixel text-sm text-slate-400 opacity-60"
+            className="pixel-btn bg-sky-400 px-8 py-3 font-pixel text-sm text-[#1a2332] hover:bg-sky-300"
+            style={{ transition: "background-color 80ms ease" }}
+            onClick={() => {
+              startDemoMusic();
+              router.push("/office");
+            }}
           >
             Clock In
           </button>
           <p className="font-mono text-[9px] text-slate-500">
-            Full shift — coming soon
+            Office walk — shift systems coming later
           </p>
           <button
             type="button"
